@@ -48,6 +48,18 @@ loom {
 	// Class tweaker (26.x name for access wideners), see src/main/resources/silentgear.classtweaker.
 	accessWidenerPath = file("src/main/resources/silentgear.classtweaker")
 
+	runs {
+		// Fixed offline name for the dev client. Without it the name is random on every launch, so
+		// op status and player data would not carry over between test runs.
+		client {
+			programArgs "--username", "Dev"
+		}
+		// Give the dev server its own folder, so runServer and runClient can run at the same time.
+		server {
+			runDir "run-server"
+		}
+	}
+
 	// Tell Loom which source sets belong to which mod, so the dev launcher
 	// loads Silent Lib from the sibling subproject as a proper mod.
 	mods {

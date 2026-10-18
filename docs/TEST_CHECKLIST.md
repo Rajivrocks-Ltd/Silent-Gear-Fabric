@@ -79,6 +79,34 @@ Gear behavior (durability, traits, tool actions) is not wired yet, see PORTING_N
       Silent Gear section)
 - [x] `/reload` runs. Errors about materials, parts or traits are expected until M5 is checked
 
+### M5 data-driven systems
+- [x] Counts match the NeoForge reference (2026-10-18): 77 traits, 131 materials (123 standard),
+      48 parts (48 compound), 2116 recipes, 1892 advancements, 5 chest loot injections
+- [x] `/reload` runs (M4)
+- [x] Test data pack `test-packs/sg_port_test` (overrides iron, adds "Test Metal"):
+  1. Copy the folder `test-packs/sg_port_test` into the world's `datapacks` folder
+     (Fabric dev: `silent-gear-fabric/run/saves/<world>/datapacks/`, Modrinth: the profile's
+     `saves/<world>/datapacks/`), then run `/reload`. `/datapack list` shows `file/sg_port_test` enabled
+  2. Iron ingot tooltip, holding the "Display Properties and Traits" key (Left Ctrl): durability **999**,
+     harvest speed **20** (normally 250 and 6)
+  3. Copper block tooltip shows the gold "SGear Material" line, and with Left Ctrl durability **1234**.
+     With advanced tooltips on (F3+H) it also shows "Material ID: sgtest:test_metal" and
+     "Material data pack: file/sg_port_test". The material name itself is never shown in tooltips
+  4. Same results in the NeoForge reference instance
+  5. Remove the folder, `/reload` again: iron is back to 250 and 6, Test Metal is gone
+
+### M6 networking and sync (dedicated server)
+- [x] One time setup: run `.\gradlew.bat :silent-gear-fabric:runServer` once. It stops and creates
+      `silent-gear-fabric/run-server/`. In there, set `eula=true` in `eula.txt` (this accepts the Minecraft
+      EULA) and `online-mode=false` in `server.properties` (the dev client has no real account)
+- [x] Start `runServer`, then `runClient` in a second terminal, Multiplayer > Direct Connection > `localhost`.
+      The server has no window: its terminal is the console (commands without `/`). The dev client is
+      named `Dev`, so type `op Dev` there once to use creative mode and `/give`
+- [x] Client log shows "Received 77 traits / 131 materials / 48 parts from server"
+- [x] Iron ingot tooltip (Left Ctrl) shows iron's stats
+- [x] Copy the test pack into `run-server/world/datapacks/`, type `reload` in the server console: the client
+      tooltip shows durability 999 without reconnecting
+
 ## Full pass (M11 and Phase 2)
 
 ### Boot and stability

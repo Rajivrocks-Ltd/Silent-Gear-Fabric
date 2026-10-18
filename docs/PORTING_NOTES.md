@@ -207,6 +207,16 @@ Every diff in this port is against these commits. They live in `reference/` (git
   "Tags not bound". `WindBlastTraitEffect` did this in a static field (`BLOCKS_WIND_CHARGE_EXPLOSIONS`),
   which crashed the first M4 launch. It is now built on first use. A scan found no other static tag lookups.
 
+### 2026-10-18 (M5 reference comparison)
+
+- NeoForge reference instance (Modrinth App, NeoForge 26.1.2.112, Silent Gear 4.2.3, Silent Lib 11.2.0) and the
+  Fabric port load identical data: 77 traits, 131 materials (123 standard), 48 parts, 2116 recipes,
+  1892 advancements, 5 chest loot injections, and the client receives 77/131/48 on join.
+- The reference log confirms the trident model warning and the block model warnings are upstream.
+- Upstream's `recipe/sapling/netherwood.json` uses the key `conditions`, which NeoForge 26 does not read
+  (it expects `neoforge:conditions`), so NeoForge logs a parse error for it. The Fabric port skips it cleanly.
+- Test data pack for M5/M6/M11: `test-packs/sg_port_test`. The dev server runs in `silent-gear-fabric/run-server`.
+
 ### Hooks still to wire (stand-ins exist, nothing fires them yet)
 
 Gear behavior that depends on these does nothing yet. Each is listed on its stand-in's javadoc too.

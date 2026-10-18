@@ -1,0 +1,7 @@
+{
+  "pack": {
+    "description": "Silent Gear port test: iron overridden (durability 999, harvest speed 20), new Test Metal from copper blocks",
+    "min_format": 101,
+    "max_format": 101
+  }
+}
