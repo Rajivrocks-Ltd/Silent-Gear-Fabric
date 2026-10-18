@@ -1,0 +1,232 @@
+package net.silentchaos512.gear.gear.material;
+
+import com.google.common.collect.Sets;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
+import net.silentchaos512.gear.api.item.GearType;
+import net.silentchaos512.gear.api.material.*;
+import net.silentchaos512.gear.api.material.modifier.IMaterialModifierType;
+import net.silentchaos512.gear.api.part.PartType;
+import net.silentchaos512.gear.api.property.GearPropertyMap;
+import net.silentchaos512.gear.api.property.GearPropertyValue;
+import net.silentchaos512.gear.api.util.DataResource;
+import net.silentchaos512.gear.api.util.PropertyKey;
+import net.silentchaos512.gear.setup.SgRegistries;
+import net.silentchaos512.gear.setup.gear.GearProperties;
+import net.silentchaos512.gear.setup.gear.PartTypes;
+import net.silentchaos512.gear.util.ItemHelper;
+import net.silentchaos512.lib.util.Color;
+
+import javax.annotation.Nullable;
+import java.util.*;
+
+public abstract class AbstractMaterial implements Material {
+    protected final DataResource<Material> parent;
+    protected final MaterialCraftingData crafting;
+    protected final MaterialDisplayData display;
+    protected final Map<PartType, GearPropertyMap> properties = new LinkedHashMap<>();
+
+    protected AbstractMaterial(
+            DataResource<Material> parent,
+            MaterialCraftingData crafting,
+            MaterialDisplayData display,
+            Map<PartType, GearPropertyMap> properties
+    ) {
+        this.parent = parent;
+        this.crafting = crafting;
+        this.display = display;
+        this.properties.putAll(properties);
+    }
+
+    @Nullable
+    @Override
+    public Material getParent() {
+        return this.parent.getNullable();
+    }
+
+    @Override
+    public Collection<IMaterialCategory> getCategories(MaterialInstance material) {
+        var categories = this.crafting.categories();
+        if (categories.isEmpty() && getParent() != null) {
+            return getParent().getCategories(material);
+        }
+        return new HashSet<>(categories);
+    }
+
+    @Override
+    public boolean isInCategory(IMaterialCategory category) {
+        return this.crafting.categories().contains(category);
+    }
+
+    @Override
+    public Optional<Ingredient> getIngredient() {
+        return crafting.craftingItem();
+    }
+
+    @Override
+    public Optional<Ingredient> getPartSubstitute(PartType partType) {
+        return Optional.ofNullable(this.crafting.partSubstitutes().get(partType));
+    }
+
+    @Override
+    public boolean hasPartSubstitutes() {
+        return !this.crafting.partSubstitutes().isEmpty();
+    }
+
+    @Override
+    public boolean canSalvage() {
+        return this.crafting.canSalvage();
+    }
+
+    @Override
+    public MaterialInstance onSalvage(MaterialInstance material, PartType partType) {
+        var salvageItem = material.getSalvageItem(partType);
+        if (salvageItem != null) {
+            var itemWithoutEnhancements = removeEnhancements(material.get(), salvageItem);
+            return MaterialInstance.of(material.get(), itemWithoutEnhancements);
+        }
+        return material;
+    }
+
+    public static MaterialInstance removeEnhancements(MaterialInstance material) {
+        if (material.isValid() && material.getItem() != null) {
+            ItemStack newItemStack = removeEnhancements(material.get(), material.getItem());
+            return MaterialInstance.of(material.get(), newItemStack);
+        } else {
+            return material;
+        }
+    }
+
+    public static ItemStack removeEnhancements(Material material, ItemStackTemplate stack) {
+        ItemStack result = stack.create();
+        for (IMaterialModifierType<?> modifierType : SgRegistries.MATERIAL_MODIFIER_TYPE) {
+            modifierType.removeModifier(result);
+        }
+        result.set(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
+        return result;
+    }
+
+    @Override
+    public boolean isValid() {
+        return getIngredient().isPresent();
+    }
+
+    @Override
+    public Set<PartType> getPartTypes(MaterialInstance material) {
+        // Grab the part types from this part and its parent(s)
+        return Sets.union(properties.keySet(), getParentOptional()
+                .<Set<PartType>>map(m -> new LinkedHashSet<>(m.getPartTypes(material))).orElse(Collections.emptySet()));
+    }
+
+    @Override
+    public boolean isAllowedInPart(MaterialInstance material, PartType partType) {
+        return getPartTypes(material).contains(partType);
+    }
+
+    @Override
+    public <T, V extends GearPropertyValue<T>> Collection<V> getPropertyModifiers(MaterialInstance instance, PartType partType, PropertyKey<T, V> key) {
+        Collection<V> ret = new ArrayList<>(properties.getOrDefault(partType, GearPropertyMap.EMPTY).getValues(key));
+        if (ret.isEmpty() && getParent() != null) {
+            ret.addAll(getParent().getPropertyModifiers(instance, partType, key));
+        }
+        return ret;
+    }
+
+    @Override
+    public Collection<PropertyKey<?, ?>> getPropertyKeys(MaterialInstance material, PartType type) {
+        GearPropertyMap map = this.properties.getOrDefault(type, GearPropertyMap.EMPTY);
+        if (map.isEmpty() && getParent() != null) {
+            return getParent().getPropertyKeys(material, type);
+        }
+        return map.keySet();
+    }
+
+    @Override
+    public boolean isCraftingAllowed(MaterialInstance material, PartType partType, GearType gearType, @Nullable CraftingInput craftingInput) {
+        if (isGearTypeBlacklisted(gearType) || (partType != PartTypes.NONE.get() && !isAllowedInPart(material, partType))) {
+            return false;
+        }
+
+        if (properties.containsKey(partType) || partType == PartTypes.NONE.get() || (getParent() != null && getParent().isCraftingAllowed(material, partType, gearType, craftingInput))) {
+            if (isAdditiveMaterial(material, partType, gearType)) {
+                return false;
+            }
+            if (partType == PartTypes.MAIN.get()) {
+                var durabilityProperty = gearType.durabilityStat().get();
+                var durabilityKey = PropertyKey.of(durabilityProperty, gearType);
+                return !getPropertyModifiers(material, partType, durabilityKey).isEmpty() && getPropertyUnclamped(material, partType, durabilityKey) > 0;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isAdditiveMaterial(MaterialInstance material, PartType partType, GearType gearType) {
+        var additiveKey = PropertyKey.of(GearProperties.ADDITIVE.get(), gearType);
+        return getPropertyUnclamped(material, partType, additiveKey);
+    }
+
+    private boolean isGearTypeBlacklisted(GearType gearType) {
+        for (GearType gt : this.crafting.gearTypeBlacklist()) {
+            if (gearType.matches(gt)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public Component getDisplayName(@Nullable MaterialInstance material, PartType type) {
+        return display.name().copy();
+    }
+
+    @Override
+    public Component getSimpleName(@Nullable MaterialInstance material) {
+        var name = display.name();
+        if (name.getContents() instanceof TranslatableContents translatableContents) {
+            var key = translatableContents.getKey();
+            var simpleNameKey = key + ".simple";
+            return Component.translatableWithFallback(simpleNameKey, "%s", name);
+        }
+        return name;
+    }
+
+    @Override
+    public Component getDisplayNamePrefix(PartType partType) {
+        return display.namePrefix().copy();
+    }
+
+    @Override
+    public TextureType getMainTextureType(MaterialInstance material) {
+        return display.mainTextureType();
+    }
+
+    @Override
+    public int getColor(MaterialInstance material, PartType partType, GearType gearType) {
+        return display.color().getColor();
+    }
+
+    @Override
+    public int getNameColor(MaterialInstance material, PartType partType, GearType gearType) {
+        int color = getColor(material, partType, gearType);
+        return Color.blend(color, Color.VALUE_WHITE, 0.25f) & 0xFFFFFF;
+    }
+
+    @Override
+    public MaterialEquippableInfo getEquippableInfo() {
+        return display.equippableInfo();
+    }
+
+    @Override
+    public String toString() {
+        return "AbstractMaterial{" +
+                "id=" + SgRegistries.MATERIAL.getKey(this) +
+                '}';
+    }
+}

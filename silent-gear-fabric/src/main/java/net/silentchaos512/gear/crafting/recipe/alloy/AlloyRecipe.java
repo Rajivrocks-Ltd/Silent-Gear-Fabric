@@ -1,0 +1,189 @@
+package net.silentchaos512.gear.crafting.recipe.alloy;
+
+import com.google.common.collect.ImmutableList;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.level.Level;
+import net.silentchaos512.gear.api.material.IMaterialCategory;
+import net.silentchaos512.gear.api.material.Material;
+import net.silentchaos512.gear.api.util.DataResource;
+import net.silentchaos512.gear.block.alloymaker.AlloyMakerInfo;
+import net.silentchaos512.gear.crafting.ingredient.PartMaterialIngredient;
+import net.silentchaos512.gear.gear.material.MaterialInstance;
+import net.silentchaos512.gear.item.CustomMaterialItem;
+import net.silentchaos512.gear.setup.SgRecipeBookCategories;
+import net.silentchaos512.gear.setup.SgRecipes;
+import net.silentchaos512.gear.setup.gear.GearTypes;
+import net.silentchaos512.gear.setup.gear.PartTypes;
+import net.silentchaos512.gear.util.CodecUtils;
+import net.silentchaos512.gear.util.Const;
+
+import javax.annotation.Nullable;
+import java.util.*;
+import java.util.function.BiFunction;
+
+public class AlloyRecipe implements Recipe<AlloyRecipeInput> {
+    final List<Ingredient> ingredients;
+    final Result result;
+    @Nullable private PlacementInfo placementInfo = null;
+
+    public AlloyRecipe(Result result, List<Ingredient> ingredients) {
+        this.result = result;
+        this.ingredients = ImmutableList.copyOf(ingredients);
+    }
+
+    public static <R extends AlloyRecipe> R makeExample(AlloyMakerInfo<?> info, int count, BiFunction<Result, List<Ingredient>, R> recipeFactory) {
+        IMaterialCategory[] cats = info.getCategories().toArray(new IMaterialCategory[0]);
+        List<Ingredient> list = new ArrayList<>();
+        for (int i = 0; i < count; ++i) {
+            var partMaterialIngredient = PartMaterialIngredient.of(PartTypes.NONE.get(), GearTypes.ALL.get(), cats);
+            list.add(partMaterialIngredient.toVanilla()); // Port note: NeoForge new Ingredient(custom) is Fabric toVanilla()
+        }
+        return recipeFactory.apply(new Result(info.getOutputItem(), count, Const.Materials.EXAMPLE), list);
+    }
+
+    public ItemStack getResultForRecipeDisplay() {
+        return this.result.getResult();
+    }
+
+    public List<Ingredient> getIngredients() {
+        return this.ingredients;
+    }
+
+    @Override
+    public boolean matches(AlloyRecipeInput inv, Level worldIn) {
+        Set<Integer> matches = new HashSet<>();
+        int inputs = 0;
+
+        for (int i = 0; i < inv.size(); ++i) {
+            if (!inv.getItem(i).isEmpty()) {
+                ++inputs;
+            }
+        }
+
+        for (Ingredient ingredient : this.ingredients) {
+            boolean found = false;
+
+            for (int i = 0; i < inv.size(); ++i) {
+                ItemStack stack = inv.getItem(i);
+
+                if (!stack.isEmpty() && ingredient.test(stack)) {
+                    found = true;
+                    matches.add(i);
+                }
+            }
+
+            if (!found) {
+                return false;
+            }
+        }
+
+        int matchCount = matches.size();
+        return matchCount == inputs && matchCount == this.ingredients.size();
+    }
+
+    @Override
+    public ItemStack assemble(AlloyRecipeInput input) {
+        return this.result.getResult();
+    }
+
+    @Override
+    public boolean isSpecial() {
+        return true;
+    }
+
+    @Override
+    public boolean showNotification() {
+        return false;
+    }
+
+    @Override
+    public String group() {
+        return "";
+    }
+
+    @Override
+    public RecipeSerializer<? extends Recipe<AlloyRecipeInput>> getSerializer() {
+        return SgRecipes.COMPOUNDING.get();
+    }
+
+    @Override
+    public RecipeType<? extends Recipe<AlloyRecipeInput>> getType() {
+        return SgRecipes.COMPOUNDING_TYPE.get();
+    }
+
+    @Override
+    public PlacementInfo placementInfo() {
+        if (this.placementInfo == null) {
+            this.placementInfo = PlacementInfo.create(this.ingredients);
+        }
+        return this.placementInfo;
+    }
+
+    @Override
+    public RecipeBookCategory recipeBookCategory() {
+        return SgRecipeBookCategories.ALLOY_FORGE.get();
+    }
+
+    public record Result(
+            Item item,
+            int count,
+            @Nullable DataResource<Material> material
+    ) {
+        public static final Codec<Result> CODEC = RecordCodecBuilder.create(
+                instance -> instance.group(
+                        BuiltInRegistries.ITEM.byNameCodec().fieldOf("item").forGetter(r -> r.item),
+                        Codec.INT.optionalFieldOf("count", 1).forGetter(r -> r.count),
+                        DataResource.MATERIAL_CODEC.optionalFieldOf("material").forGetter(r -> Optional.ofNullable(r.material))
+                ).apply(instance, (item, count, material) -> new Result(item, count, material.orElse(null)))
+        );
+        public static final StreamCodec<RegistryFriendlyByteBuf, Result> STREAM_CODEC = StreamCodec.composite(
+                ByteBufCodecs.registry(Registries.ITEM), r -> r.item,
+                ByteBufCodecs.VAR_INT, r -> r.count,
+                DataResource.MATERIAL_STREAM_CODEC.apply(ByteBufCodecs::optional), r -> Optional.ofNullable(r.material),
+                (item1, count1, material1) -> new Result(item1, count1, material1.orElse(null))
+        );
+
+        public ItemStack getResult() {
+            if (item instanceof CustomMaterialItem customMaterialItem && material != null) {
+                return customMaterialItem.create(MaterialInstance.of(material), count);
+            }
+            return new ItemStack(item, count);
+        }
+    }
+
+    @FunctionalInterface
+    public interface Factory<R extends AlloyRecipe> {
+        R create(Result result, List<Ingredient> ingredients);
+    }
+
+    public static <R extends AlloyRecipe> RecipeSerializer<R> createSerializer(Factory<R> factory) {
+        return new RecipeSerializer<>(
+                RecordCodecBuilder.mapCodec(
+                        instance -> instance.group(
+                                Result.CODEC.fieldOf("result").forGetter(r -> r.result),
+                                Codec.list(Ingredient.CODEC).fieldOf("ingredients").forGetter(r -> r.ingredients)
+                        ).apply(instance, factory::create)
+                ),
+                StreamCodec.of(
+                        (buf, r) -> {
+                            Result.STREAM_CODEC.encode(buf, r.result);
+                            CodecUtils.encodeList(buf, r.ingredients, Ingredient.CONTENTS_STREAM_CODEC);
+                        },
+                        buf -> {
+                            var result = Result.STREAM_CODEC.decode(buf);
+                            var ingredients = CodecUtils.decodeList(buf, Ingredient.CONTENTS_STREAM_CODEC);
+                            return factory.create(result, ingredients);
+                        }
+                )
+        );
+    }
+}

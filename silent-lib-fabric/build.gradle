@@ -10,6 +10,10 @@ base {
 }
 
 loom {
+	// Class tweaker (26.x name for access wideners). Injects the NeoForge-style extension
+	// interfaces into vanilla classes, see src/main/resources/silentlib.classtweaker.
+	accessWidenerPath = file("src/main/resources/silentlib.classtweaker")
+
 	// This subproject is a library. Launch the game from silent-gear-fabric instead,
 	// so do not generate IDE run configurations here.
 	runConfigs.configureEach {

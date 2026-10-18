@@ -56,12 +56,28 @@ Data pack files are left out of the build until M4, so this checks the client as
 - Expected in the log until M9: errors about 86 `silentgear` item models with unknown
   `silentgear:gear_part`, `silentgear:material` or `silentgear:paint_color` types. Claude filters these.
 
-### M4 registries and basic content (to be expanded when M4 is done)
-- [ ] Data pack files are back in the build (the M3 exclude is removed). `/reload` shows no
-      Silent Gear errors except for recipes, materials, parts and traits that need M5 or M7 code
-- [ ] New world: you receive the starter blueprint package once. Save, quit, reopen the world:
+### M4 registries and basic content (passed 2026-10-18 with `runClient`)
+Gear behavior (durability, traits, tool actions) is not wired yet, see PORTING_NOTES "Hooks still to wire".
+- [x] `runClient` reaches the title screen (after two startup fixes)
+- [x] Log shows `Silent Gear (Fabric) initialized` and `Silent Gear (Fabric) client initialized`
+- [x] Create a **new** creative world (old test worlds predate the content). It loads
+- [x] Creative inventory has two tabs: "Silent Gear: Main" and "Silent Gear: Gear". Fabric puts modded tabs on
+      **page 2**: use the arrow buttons at the top of the creative screen
+- [x] Items in both tabs have names and textures (tridents were missing a texture, fixed)
+- [x] Place and break a few blocks: an ore, a storage block, netherwood log, a crafting station
+      (Gear Smithing Table, Alloy Forge). They drop themselves or their items
+- [x] Strip a netherwood log with a vanilla axe
+- [x] Open the Alloy Forge GUI (crafting is M7). The Gear Smithing Table has no GUI upstream either; it is a
+      decorative block and villager workstation
+- [x] Open the Material Grader, Paint Mixer and Salvager GUIs (failed in the first M4 run, fixed)
+- [x] Starlight Charger and Material Grader screens show their titles (label color fix)
+- [x] New world: you receive the starter blueprint package once. Save, quit, reopen the world:
       you do **not** receive it again (tests Silent Lib's persisted player data)
-- [ ] Cutout blocks (flax and fluffy crops, flowers, saplings) render with transparent pixels, not black
+- [x] Cutout blocks (flax and fluffy crops, flowers, saplings) render with transparent pixels, not black
+- [x] Options > Controls > Key Binds, **Inventory** section: "Cycle Back", "Cycle Next", "Display Properties and
+      Traits", "Display Construction and Materials", "Display Trait Descriptions", "Open Item" (upstream has no
+      Silent Gear section)
+- [x] `/reload` runs. Errors about materials, parts or traits are expected until M5 is checked
 
 ## Full pass (M11 and Phase 2)
 

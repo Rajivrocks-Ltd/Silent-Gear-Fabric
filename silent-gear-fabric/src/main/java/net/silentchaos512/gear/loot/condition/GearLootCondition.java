@@ -1,0 +1,25 @@
+package net.silentchaos512.gear.loot.condition;
+
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+
+abstract class GearLootCondition implements LootItemCondition {
+    static ItemStack getItemUsed(LootContext context) {
+        // Attempt to get the tool from context first, then the attacking player if unavailable
+        var tool = context.getOptionalParameter(LootContextParams.TOOL);
+        if (tool != null && tool instanceof ItemStack stack) {
+            return stack;
+        }
+
+        Entity entity = context.getOptionalParameter(LootContextParams.ATTACKING_ENTITY);
+        if (entity instanceof Player) {
+            return ((Player) entity).getMainHandItem();
+        }
+
+        return ItemStack.EMPTY;
+    }
+}

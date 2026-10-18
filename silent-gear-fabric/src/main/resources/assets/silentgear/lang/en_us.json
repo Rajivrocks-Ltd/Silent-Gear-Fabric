@@ -1198,5 +1198,6 @@
   "trait.silentgear.wind_blast": "Wind Blast",
   "trait.silentgear.wind_blast.desc": "Creates a blast of wind when attacking",
   "trait.silentgear.yummy": "Yummy",
-  "trait.silentgear.yummy.desc": "Makes the item edible, but..."
+  "trait.silentgear.yummy.desc": "Makes the item edible, but...",
+  "attribute.name.silentgear.swim_speed": "Swim Speed"
 }

@@ -2,6 +2,7 @@ package net.silentchaos512.lib;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.silentchaos512.lib.event.ClientTicks;
+import net.silentchaos512.lib.port.event.FabricClientEventBridge;
 
 /**
  * Client-only entry point for Silent Lib on Fabric.
@@ -16,6 +17,7 @@ public final class SilentLibClient implements ClientModInitializer {
      */
     @Override
     public void onInitializeClient() {
+        FabricClientEventBridge.init();
         ClientTicks.init();
 
         SilentLib.LOGGER.info("Silent Lib (Fabric) client initialized");

@@ -1,0 +1,146 @@
+package net.silentchaos512.gear.item.blueprint.book;
+
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.silentchaos512.lib.port.items.IItemHandler;
+import net.silentchaos512.lib.port.items.SlotItemHandler;
+import net.silentchaos512.gear.item.IContainerItem;
+import net.silentchaos512.gear.setup.SgMenuTypes;
+
+import javax.annotation.Nonnull;
+
+public class BlueprintBookContainerMenu extends AbstractContainerMenu {
+    final ItemStack item;
+    private final IItemHandler itemHandler;
+    int bookSlot = -1;
+
+    public BlueprintBookContainerMenu(int id, Inventory playerInventory, RegistryFriendlyByteBuf data) {
+        this(id, playerInventory, ItemStack.STREAM_CODEC.decode(data));
+    }
+
+    BlueprintBookContainerMenu(int id, Inventory playerInventory, ItemStack stack) {
+        super(SgMenuTypes.BLUEPRINT_BOOK.get(), id);
+        this.item = stack;
+        IContainerItem containerItem = (IContainerItem) this.item.getItem();
+        this.itemHandler = containerItem.getInventory(this.item);
+
+        for (int i = 0; i < this.itemHandler.getSlots(); ++i) {
+            int x = 8 + 18 * (i % 9);
+            int y = 18 + 18 * (i / 9);
+            addSlot(new SlotItemHandler(itemHandler, i, x, y) {
+                @Override
+                public boolean mayPlace(@Nonnull ItemStack stack) {
+                    return containerItem.canStore(stack);
+                }
+            });
+        }
+
+        final int rowCount = this.itemHandler.getSlots() / 9;
+        final int yOffset = (rowCount - 4) * 18;
+
+        // Player inventory
+        for (int y = 0; y < 3; ++y) {
+            for (int x = 0; x < 9; ++x) {
+                addSlot(new Slot(playerInventory, x + y * 9 + 9, 8 + x * 18, 103 + y * 18 + yOffset));
+            }
+        }
+
+        // Hotbar
+        for (int x = 0; x < 9; ++x) {
+            Slot slot = addSlot(new Slot(playerInventory, x, 8 + x * 18, 161 + yOffset) {
+                @Override
+                public boolean mayPickup(Player playerIn) {
+                    return index != bookSlot;
+                }
+            });
+
+            if (x == playerInventory.getSelectedSlot() && ItemStack.matches(playerInventory.getSelectedItem(), this.item)) {
+                bookSlot = slot.index;
+            }
+        }
+    }
+
+    int getContainerRows() {
+        IContainerItem item = (IContainerItem) this.item.getItem();
+        return item.getInventoryRows(this.item);
+    }
+
+    @Override
+    public boolean stillValid(Player playerIn) {
+        return true;
+    }
+
+    @Override
+    public ItemStack quickMoveStack(Player playerIn, int index) {
+        Slot slot = this.getSlot(index);
+
+        if (!slot.mayPickup(playerIn))
+            return slot.getItem();
+
+        if (index == bookSlot || !slot.hasItem())
+            return ItemStack.EMPTY;
+
+        ItemStack stack = slot.getItem();
+        ItemStack newStack = stack.copy();
+
+        int containerSlots = itemHandler.getSlots();
+        if (index < containerSlots) {
+            if (!this.moveItemStackTo(stack, containerSlots, this.slots.size(), true))
+                return ItemStack.EMPTY;
+            slot.setChanged();
+        } else if (!this.moveItemStackTo(stack, 0, containerSlots, false)) {
+            return ItemStack.EMPTY;
+        }
+
+        if (stack.isEmpty())
+            slot.set(ItemStack.EMPTY);
+        else
+            slot.setChanged();
+
+        slot.onTake(playerIn, newStack);
+        return newStack;
+    }
+
+    @Override
+    public void clicked(int slotIndex, int buttonNum, ContainerInput containerInput, Player player) {
+        if (slotIndex < 0 || slotIndex > slots.size()) {
+            super.clicked(slotIndex, buttonNum, containerInput, player);
+            return;
+        }
+
+        Slot slot = slots.get(slotIndex);
+        if (!canTake(slotIndex, slot, buttonNum, player, containerInput)) {
+            return;
+        }
+
+        super.clicked(slotIndex, buttonNum, containerInput, player);
+    }
+
+    public boolean canTake(int slotId, Slot slot, int button, Player player, ContainerInput clickType) {
+        if (slotId == bookSlot)
+            return false;
+
+        // Hotbar swapping via number keys
+        if (clickType == ContainerInput.SWAP) {
+            int hotbarId = itemHandler.getSlots() + 27 + button;
+            // Block swapping with container
+            if (bookSlot == hotbarId)
+                return false;
+
+            Slot hotbarSlot = getSlot(hotbarId);
+            if (slotId <= itemHandler.getSlots() - 1)
+                return !isContainerItem(slot.getItem()) && !isContainerItem(hotbarSlot.getItem());
+        }
+
+        return true;
+    }
+
+    private static boolean isContainerItem(ItemStack stack) {
+        return stack.getItem() instanceof BlueprintBookItem;
+    }
+}

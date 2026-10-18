@@ -1,0 +1,71 @@
+package net.silentchaos512.gear.gear.material.modifier;
+
+import com.mojang.serialization.MapCodec;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Unit;
+import net.minecraft.world.item.ItemInstance;
+import net.minecraft.world.item.ItemStack;
+import net.silentchaos512.gear.api.material.modifier.IMaterialModifier;
+import net.silentchaos512.gear.api.material.modifier.IMaterialModifierType;
+
+import java.util.Optional;
+import java.util.function.Supplier;
+
+public abstract class UnitMaterialModifier implements IMaterialModifier {
+    @Override
+    public MutableComponent modifyMaterialName(MutableComponent name) {
+        // No changes by default
+        return name;
+    }
+
+    public static class Type<M extends UnitMaterialModifier> implements IMaterialModifierType<M> {
+        private final Identifier id;
+        private final M instance;
+        private final Supplier<DataComponentType<Unit>> dataComponent;
+        private final MapCodec<M> codec;
+        private final StreamCodec<RegistryFriendlyByteBuf, M> streamCodec;
+
+        public Type(Identifier id, M instance, Supplier<DataComponentType<Unit>> dataComponent, MapCodec<M> codec, StreamCodec<RegistryFriendlyByteBuf, M> streamCodec) {
+            this.id = id;
+            this.instance = instance;
+            this.dataComponent = dataComponent;
+            this.codec = codec;
+            this.streamCodec = streamCodec;
+        }
+
+        @Override
+        public Identifier getId() {
+            return this.id;
+        }
+
+        @Override
+        public Optional<M> readModifier(ItemInstance instance) {
+            // Port note: NeoForge accepts a Supplier for has/set/remove; vanilla needs the type, hence .get()
+            return instance.get(this.dataComponent.get()) != null ? Optional.of(this.instance) : Optional.empty();
+        }
+
+        @Override
+        public void addModifier(M mod, ItemStack stack) {
+            stack.set(this.dataComponent.get(), Unit.INSTANCE);
+        }
+
+        @Override
+        public void removeModifier(ItemStack stack) {
+            stack.remove(this.dataComponent.get());
+        }
+
+        @Override
+        public MapCodec<M> codec() {
+            return this.codec;
+        }
+
+        @Override
+        public StreamCodec<RegistryFriendlyByteBuf, M> streamCodec() {
+            return this.streamCodec;
+        }
+    }
+}

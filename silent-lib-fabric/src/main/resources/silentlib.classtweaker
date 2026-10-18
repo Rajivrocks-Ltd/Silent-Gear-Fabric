@@ -1,0 +1,9 @@
+classTweaker	v1	official
+# Silent Lib (Fabric port). NeoForge-style extension methods on vanilla classes.
+# Transitive, so mods that depend on Silent Lib see the methods when they compile.
+transitive-inject-interface	net/minecraft/world/item/Item	net/silentchaos512/lib/port/IItemExtension
+transitive-inject-interface	net/minecraft/world/level/block/Block	net/silentchaos512/lib/port/IBlockExtension
+transitive-inject-interface	net/minecraft/world/level/block/state/BlockBehaviour$BlockStateBase	net/silentchaos512/lib/port/IBlockStateExtension
+transitive-inject-interface	net/minecraft/world/level/block/entity/BlockEntity	net/silentchaos512/lib/port/IBlockEntityExtension
+transitive-inject-interface	net/minecraft/world/item/Item$Properties	net/silentchaos512/lib/port/IItemPropertiesExtension
+transitive-inject-interface	net/minecraft/world/entity/player/Player	net/silentchaos512/lib/port/menu/IPlayerExtension

@@ -1,0 +1,92 @@
+package net.silentchaos512.gear.crafting.recipe;
+
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.level.Level;
+import net.silentchaos512.gear.api.item.GearType;
+import net.silentchaos512.gear.api.material.Material;
+import net.silentchaos512.gear.gear.material.MaterialInstance;
+import net.silentchaos512.gear.item.CompoundPartItem;
+import net.silentchaos512.gear.setup.SgRecipes;
+import net.silentchaos512.lib.crafting.recipe.ExtendedShapelessRecipe;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class ShapelessCompoundPartRecipe extends ExtendedShapelessRecipe {
+    private final CompoundPartItem item;
+
+    public ShapelessCompoundPartRecipe(CommonInfo commonInfo, CraftingBookInfo bookInfo, ItemStackTemplate result, List<Ingredient> ingredients) {
+        super(commonInfo, bookInfo, result, ingredients);
+
+        if (!(result.item().value() instanceof CompoundPartItem)) {
+            throw new IllegalArgumentException("result is not a compound part item: " + result);
+        }
+        this.item = (CompoundPartItem) result.item().value();
+    }
+
+    protected GearType getGearType() {
+        return this.item.getGearType();
+    }
+
+    @Override
+    public RecipeSerializer<ShapelessCompoundPartRecipe> getSerializer() {
+        return SgRecipes.COMPOUND_PART.get();
+    }
+
+    @Override
+    public boolean matches(CraftingInput inv, Level worldIn) {
+        if (!super.matches(inv, worldIn)) return false;
+
+        Material first = null;
+
+        for (int i = 0; i < inv.size(); ++i) {
+            ItemStack stack = inv.getItem(i);
+            MaterialInstance mat = MaterialInstance.from(stack);
+
+            if (mat != null) {
+                if (!mat.get().isCraftingAllowed(mat, item.getPartType(), this.getGearType(), inv)) {
+                    return false;
+                }
+
+                // If classic mixing is disabled, all materials must be the same
+                if (first == null) {
+                    first = mat.get();
+                } else if (first != mat.get()) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    public ItemStack assemble(CraftingInput inv) {
+        return item.create(getMaterials(inv));
+    }
+
+    private static List<MaterialInstance> getMaterials(CraftingInput inv) {
+        var ret = new ArrayList<MaterialInstance>();
+
+        for (int i = 0; i < inv.size(); i++) {
+            ItemStack stack = inv.getItem(i);
+            if (!stack.isEmpty()) {
+                MaterialInstance material = MaterialInstance.from(stack.copy().split(1));
+                if (material != null) {
+                    ret.add(material);
+                }
+            }
+        }
+
+        return ret;
+    }
+
+    @Override
+    public boolean isSpecial() {
+        return true;
+    }
+}

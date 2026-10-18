@@ -24,6 +24,10 @@
 			"net.silentchaos512.lib.SilentLibClient"
 		]
 	},
+	"mixins": [
+		"silentlib.mixins.json"
+	],
+	"accessWidener": "silentlib.classtweaker",
 	"depends": {
 		"fabricloader": ">=0.19.5",
 		"minecraft": "~26.1.2",

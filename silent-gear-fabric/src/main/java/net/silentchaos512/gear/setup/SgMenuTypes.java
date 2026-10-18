@@ -1,0 +1,153 @@
+package net.silentchaos512.gear.setup;
+
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
+import net.silentchaos512.lib.port.client.event.RegisterMenuScreensEvent;
+import net.silentchaos512.lib.port.menu.IMenuTypeExtension;
+import net.silentchaos512.lib.port.menu.IContainerFactory;
+import net.silentchaos512.lib.registry.DeferredHolder;
+import net.silentchaos512.lib.registry.DeferredRegister;
+import net.silentchaos512.gear.SilentGear;
+import net.silentchaos512.gear.block.alloymaker.AlloyMakerContainer;
+import net.silentchaos512.gear.block.alloymaker.screen.*;
+import net.silentchaos512.gear.block.charger.ChargerContainerMenu;
+import net.silentchaos512.gear.block.charger.ChargerContainerScreen;
+import net.silentchaos512.gear.block.grader.GraderContainer;
+import net.silentchaos512.gear.block.grader.GraderScreen;
+import net.silentchaos512.gear.block.paintmixer.PaintMixerMenu;
+import net.silentchaos512.gear.block.paintmixer.PaintMixerScreen;
+import net.silentchaos512.gear.block.press.MetalPressContainer;
+import net.silentchaos512.gear.block.press.MetalPressScreen;
+import net.silentchaos512.gear.block.salvager.SalvagerContainer;
+import net.silentchaos512.gear.block.salvager.SalvagerScreen;
+import net.silentchaos512.gear.item.blueprint.book.BlueprintBookContainerMenu;
+import net.silentchaos512.gear.item.blueprint.book.BlueprintBookContainerScreen;
+
+import java.util.List;
+
+public final class SgMenuTypes {
+    public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(BuiltInRegistries.MENU, SilentGear.MOD_ID);
+
+    public static final DeferredHolder<MenuType<?>, MenuType<GraderContainer>> MATERIAL_GRADER = register(
+            "material_grader",
+            GraderContainer::new
+    );
+
+    public static final DeferredHolder<MenuType<?>, MenuType<MetalPressContainer>> METAL_PRESS = register(
+            "metal_press",
+            MetalPressContainer::new
+    );
+
+    public static final DeferredHolder<MenuType<?>, MenuType<AlloyMakerContainer>> METAL_ALLOYER = register("metal_alloyer",
+            (id, playerInventory, buffer) -> new AlloyMakerContainer(
+                    getMetalAlloyer(),
+                    id,
+                    playerInventory,
+                    buffer,
+                    SgBlocks.ALLOY_FORGE.get().getCategories()
+            )
+    );
+
+    public static final DeferredHolder<MenuType<?>, MenuType<AlloyMakerContainer>> RECRYSTALLIZER = register("recrystallizer",
+            (id, playerInventory, buffer) -> new AlloyMakerContainer(
+                    getRecrystallizer(),
+                    id,
+                    playerInventory,
+                    buffer,
+                    SgBlocks.RECRYSTALLIZER.get().getCategories()
+            )
+    );
+
+    public static final DeferredHolder<MenuType<?>, MenuType<AlloyMakerContainer>> REFABRICATOR = register("refabricator",
+            (id, playerInventory, buffer) -> new AlloyMakerContainer(
+                    getRefabricator(),
+                    id,
+                    playerInventory,
+                    buffer,
+                    SgBlocks.REFABRICATOR.get().getCategories()
+            )
+    );
+
+    public static final DeferredHolder<MenuType<?>, MenuType<AlloyMakerContainer>> CRUDE_MIXER = register(
+            "crude_mixer",
+            (id, playerInventory, buf) -> new AlloyMakerContainer(
+                    getSuperMixer(),
+                    id,
+                    playerInventory,
+                    buf,
+                    List.of()
+            )
+    );
+
+    public static final DeferredHolder<MenuType<?>, MenuType<AlloyMakerContainer>> SUPER_MIXER = register(
+            "super_mixer",
+            (id, playerInventory, buf) -> new AlloyMakerContainer(
+                    getSuperMixer(),
+                    id,
+                    playerInventory,
+                    buf,
+                    List.of()
+            )
+    );
+
+    public static final DeferredHolder<MenuType<?>, MenuType<PaintMixerMenu>> PAINT_MIXER = register(
+            "paint_mixer",
+            PaintMixerMenu::new
+    );
+
+    public static final DeferredHolder<MenuType<?>, MenuType<SalvagerContainer>> SALVAGER = register(
+            "salvager",
+            SalvagerContainer::new
+    );
+
+    public static final DeferredHolder<MenuType<?>, MenuType<ChargerContainerMenu>> STARLIGHT_CHARGER = register(
+            "starlight_charger",
+            ChargerContainerMenu::createStarlightCharger
+    );
+
+    public static final DeferredHolder<MenuType<?>, MenuType<BlueprintBookContainerMenu>> BLUEPRINT_BOOK = register(
+            "blueprint_book",
+            BlueprintBookContainerMenu::new
+    );
+
+    private SgMenuTypes() {
+    }
+
+    private static <T extends AbstractContainerMenu> DeferredHolder<MenuType<?>, MenuType<T>> register(String name, IContainerFactory<T> factory) {
+        return MENU_TYPES.register(name, () -> IMenuTypeExtension.create(factory));
+    }
+
+    private static MenuType<?> getMetalAlloyer() {
+        return METAL_ALLOYER.get();
+    }
+
+    private static MenuType<?> getRecrystallizer() {
+        return RECRYSTALLIZER.get();
+    }
+
+    private static MenuType<?> getRefabricator() {
+        return REFABRICATOR.get();
+    }
+
+    private static MenuType<?> getSuperMixer() {
+        return SUPER_MIXER.get();
+    }
+
+    public static class ClientEvents {
+        public static void registerScreens(RegisterMenuScreensEvent event) {
+            event.register(CRUDE_MIXER.get(), CrudeMixerScreen::new);
+            event.register(MATERIAL_GRADER.get(), GraderScreen::new);
+            event.register(METAL_ALLOYER.get(), AlloyForgeScreen::new);
+            event.register(METAL_PRESS.get(), MetalPressScreen::new);
+            event.register(PAINT_MIXER.get(), PaintMixerScreen::new);
+            event.register(RECRYSTALLIZER.get(), RecrystallizerScreen::new);
+            event.register(REFABRICATOR.get(), RefabricatorScreen::new);
+            event.register(SALVAGER.get(), SalvagerScreen::new);
+            event.register(STARLIGHT_CHARGER.get(), ChargerContainerScreen::new);
+            event.register(SUPER_MIXER.get(), SuperMixerScreen::new);
+
+            event.register(BLUEPRINT_BOOK.get(), BlueprintBookContainerScreen::new);
+        }
+    }
+}

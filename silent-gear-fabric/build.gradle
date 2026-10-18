@@ -34,16 +34,20 @@ sourceSets.main.resources {
 	// Development only files that should not ship in the jar.
 	exclude("**/*.bbmodel")
 	exclude("**/.cache")
+}
 
-	// TEMPORARY (milestone M3 only, remove in M4): leave the data pack files out of the jar.
-	// They refer to Silent Gear blocks and items that are registered in M4. Until then, the
-	// worldgen files would stop worlds from loading, and the vanilla tags that list our blocks
-	// (for example minecraft:mineable/pickaxe) would be dropped entirely. The files stay in
-	// src/ and are checked for JSON errors offline.
-	exclude("data/**")
+sourceSets.main.java {
+	// Upstream code that is ported in a later milestone. Nothing else in the build uses these files.
+	// M8: NeoForge global loot modifiers, to become Fabric LootTableEvents.MODIFY_DROPS listeners.
+	exclude("net/silentchaos512/gear/loot/modifier/**")
+	// M10: data generator base classes (they use NeoForge's DataGenerator API).
+	exclude("net/silentchaos512/gear/api/data/**/*ProviderBase.java")
 }
 
 loom {
+	// Class tweaker (26.x name for access wideners), see src/main/resources/silentgear.classtweaker.
+	accessWidenerPath = file("src/main/resources/silentgear.classtweaker")
+
 	// Tell Loom which source sets belong to which mod, so the dev launcher
 	// loads Silent Lib from the sibling subproject as a proper mod.
 	mods {
@@ -91,6 +95,8 @@ processResources {
 tasks.withType(JavaCompile).configureEach {
 	it.options.release = 25
 	it.options.encoding = 'UTF-8'
+	// Show every compile error at once instead of javac's default of 100 (useful while porting).
+	it.options.compilerArgs += ['-Xmaxerrs', '10000']
 }
 
 java {

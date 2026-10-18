@@ -149,6 +149,87 @@ Every diff in this port is against these commits. They live in `reference/` (git
   as parent but draw their own elements, so the parent's texture slots stay empty. This comes from vanilla
   model loading and happens on NeoForge too. Upstream data is left unchanged.
 
+### 2026-10-18 (M4, registries and basic content)
+
+- **All upstream Java is in the build** except: datagen (`data/`, M10), JEI (`compat/jei`, M8), Curios
+  (`compat/curios`, replaced by Trinkets in M8), the 2 global loot modifiers (`loot/modifier`, M8) and the
+  3 datagen base classes `api/data/**/*ProviderBase` (M10). The last two are excluded in
+  `silent-gear-fabric/build.gradle`.
+- Of 483 upstream Java files, **362 are unchanged** and 121 changed, mostly import lines. 4 new port-only
+  files: `SilentGearClient`, `network/SgNetworkClient`, `setup/SgBiomeModifiers`, `setup/SgDataMaps`.
+- **Approach: Silent Lib stand-ins with NeoForge's names.** Instead of rewriting upstream code, Silent Lib
+  provides independent classes with the same class and method names as the NeoForge APIs Silent Gear uses,
+  so ported files mostly change only their imports. Full list in API_MAPPING.md, "Silent Lib stand-ins".
+  Highlights:
+  - `registry.DeferredRegister/DeferredHolder/DeferredItem/DeferredBlock`. Entries are created by
+    `register()`, called from `SideProxy` in NeoForge's registry order (attributes, data components,
+    vanilla registries in vanilla order, then Silent Gear's registries alphabetically).
+  - `DeferredRegister.DataComponents.registerComponentType` returns the plain `DataComponentType`, so the
+    89 `stack.get(SgDataComponents.X)` call sites are unchanged.
+  - `port.event.*`: NeoForge event classes (same getters) and a simple `NeoForge.EVENT_BUS`. Upstream
+    handler bodies are unchanged; each class with handlers got a `register()` method listing them
+    (replacing `@EventBusSubscriber`). Silent Gear's own add-on events use the same bus.
+  - **Interface injection** (Loom class tweaker `transitive-inject-interface` + mixin): Silent Lib adds
+    `IItemExtension`, `IItemPropertiesExtension`, `IBlockExtension`, `IBlockStateExtension`,
+    `IBlockEntityExtension` and `IPlayerExtension` to the vanilla classes, with vanilla-equivalent defaults.
+    The 20 gear item classes compile unchanged, including their `@Override`s and `super` calls.
+  - `port.items.*` (item handlers), `port.menu.*` (menus with extra data, via Fabric `ExtendedMenuType`
+    sending the raw bytes), `port.network.IPayloadContext`, `port.crafting.ICustomIngredient/IngredientType`,
+    `port.client.*` (registration events forwarding to Fabric/vanilla, `IClientItemExtensions`).
+- **Networking ported now** (planned for M6): payloads were needed to compile. The three data sync payloads
+  use Fabric `registerLarge` (64 MB), because NeoForge splits big payloads automatically and Fabric only does
+  it for large payloads.
+- **Configs register before content.** NeoForge loads configs after all mod constructors but before it
+  creates registry entries, so entry factories may read config values. `SilentGear.onInitialize()` keeps that
+  order.
+- **Ore generation, fuels, compostables** are code now (`SgBiomeModifiers`, `SgDataMaps`), same values and
+  biome tags as the upstream JSON. Compostables also register as villager-compostable, like
+  `"can_villager_compost": true`.
+- **Netherwood strip** registered with Fabric `StrippableBlockRegistry` (upstream overrode a NeoForge block hook).
+- **Recipe sync to clients:** upstream asks NeoForge for full recipes of chosen types; on Fabric every Silent
+  Gear recipe serializer is synced (`RecipeSynchronization`), which covers the same recipes.
+- **Tag `remove` lists** (3 generated tag files: incorrect_for_copper/amethyst/lapis_lazuli_tools) renamed to
+  Fabric's `fabric:remove`. NeoForge's unprefixed `"remove"` was missed by the M3 scan, which looked only for
+  `neoforge:` keys. Vanilla ignores `"remove"`, which would have left wrong blocks in those mining tiers.
+- `silentgear.classtweaker` opens what NeoForge's access transformer opens and upstream needs:
+  `Block.popExperience`, `BlockEntityType` constructor and `BlockEntitySupplier`, `Ingredient.values`,
+  `AbstractContainerScreen.hoveredSlot`.
+- Small one-to-one replacements at call sites, each marked `Port note:` in the code: `ItemTags/BlockTags.create(id)`,
+  `ItemInstance.has(...)`, `RecipeType.simple`, `canDrownInFluidType(WATER)`, `KeyMapping.getKey()`,
+  `Ingredient.isCustom()/getValues()`, `new Ingredient(custom)`, `FlowerPotBlock` constructor, `FenceGateBlock`
+  constructor (`WoodType.CRIMSON` has the same sounds), `CreativeModeTab.builder()`, `ShapedRecipePattern`
+  max size, `getEnchantmentLevel`, `TagAppender.remove(TagKey)` (Fabric datagen `removeTag`), environment checks.
+- Dropped, no Fabric equivalent: NeoForge `KeyConflictContext.GUI` (Silent Gear keys may show as conflicting
+  in the controls screen), `PlayerDestroyItemEvent` post in the fishing rod, the magnet's
+  `PreventRemoteMovement` persistent-data check, pool name on injected chest loot.
+- Item tint sources are registered already (planned for M9), so gear item models can load.
+- **Registry tags are not bound during Fabric mod init.** Looking up a tag's contents then throws
+  "Tags not bound". `WindBlastTraitEffect` did this in a static field (`BLOCKS_WIND_CHARGE_EXPLOSIONS`),
+  which crashed the first M4 launch. It is now built on first use. A scan found no other static tag lookups.
+
+### Hooks still to wire (stand-ins exist, nothing fires them yet)
+
+Gear behavior that depends on these does nothing yet. Each is listed on its stand-in's javadoc too.
+
+| Milestone | Hook | Needed for |
+|---|---|---|
+| M7 | `PlayerEvent.ItemCraftedEvent` (mixin in `ResultSlot`) | crafting advancements |
+| M7 | `IItemExtension.getCraftingRemainder(ItemInstance)` in crafting | blueprints, mod kit and blueprint book stay in the grid |
+| M7 | `IItemExtension.isCombineRepairable` in `RepairItemRecipe` | stops two gear items being combined (losing data) |
+| M7 | `CommonHooks.setCraftingPlayer` around crafting | recipes that read the crafting player |
+| M7 | `IBlockEntityExtension.onDataPacket` in client block entity updates | block entity progress shown in GUIs |
+| M8 | `IItemExtension.getMaxDamage / getDamage / setDamage / damageItem` (mixins in `ItemStack`) | gear durability |
+| M8 | `canPerformAction` for vanilla tool actions and sweep | strip, till, path, shear, sweep attack |
+| M8 | `makesPiglinsNeutral`, `canWalkOnPowderedSnow`, `getEquipmentSlot`, `getDefaultAttributeModifiers` | armor and curio items |
+| M8 | `LivingIncomingDamageEvent`, `LivingDamageEvent.Pre`, `LivingFallEvent`, `LivingExperienceDropEvent`, `PlayerTickEvent`, `PlayerEvent.BreakSpeed`, `BlockDropsEvent`, `FurnaceFuelBurnTimeEvent`, `GetEnchantmentLevelEvent`, `AnvilUpdateEvent` | traits, magic armor, anvil repair, flammable gear as fuel |
+| M8 | `silentgear:swim_speed`: add to living entity attributes, apply while swimming | Swift Swim trait |
+| M8 | global loot modifiers, mob drop tables, Trinkets | see open questions |
+| M9 | `IItemExtension.shouldCauseReequipAnimation`, `IClientItemExtensions` hand transform and armor tint | rendering details |
+
+Already fired on Fabric: `BreakBlockEvent`, `LivingDeathEvent`, `LivingDamageEvent.Post`,
+`PlayerLoggedInEvent`, `OnDatapackSyncEvent`, `LevelTickEvent`, `ItemTooltipEvent`, `InputEvent.Key` (in
+screens), attack clicks.
+
 ## Findings that change the plan
 
 - **Gear rendering is data-driven in 26.1.** Upstream has 303 item model definition files plus 3 custom
@@ -164,10 +245,11 @@ Every diff in this port is against these commits. They live in `reference/` (git
 
 ## Open questions
 
-- **`neoforge:swim_speed` attribute** (used by the `swift_swim` trait). NeoForge adds this attribute,
-  Fabric and vanilla do not. Options: (a) register a `silentgear:swim_speed` attribute and apply it with a
-  small mixin, (b) map it to vanilla `minecraft:water_movement_efficiency`, which behaves differently.
-  Recommendation: (a), decide in M8.
+- **`neoforge:swim_speed` attribute: decided 2026-10-18** (user chose option a). Silent Gear registers its own
+  `silentgear:swim_speed` (`SgAttributes.SWIM_SPEED`, base 1.0, range 0 to 1024, synced, like NeoForge's),
+  `swift_swim.json` points at it, and en_us.json has its name "Swim Speed". It has no effect until M8 adds it
+  to living entities and applies it while swimming. Found because the trait failed to load and crashed world
+  creation (upstream treats a bad trait file as fatal).
 - **`neoforge:needs_netherite_tool` block tag.** Kept under the same id through the `Tags` shim. Check in M8
   whether vanilla 26.1 tool tiers already cover this.
 - **Curios slot data** in `data/silentgear/curios` needs a Trinkets equivalent in M8.
@@ -176,8 +258,44 @@ Every diff in this port is against these commits. They live in `reference/` (git
 
 ## Mixins added
 
-None yet.
+All in Silent Lib (`silentlib.mixins.json`), added in M4.
+
+| Mixin | Target | What it does |
+|---|---|---|
+| `ItemMixin` | `Item` | Adds `IItemExtension`. Injects at the end of the constructor to keep the no-combine-repair flag. |
+| `ItemPropertiesMixin` | `Item.Properties` | Adds `IItemPropertiesExtension.setNoCombineRepair()` and stores its flag. |
+| `BlockMixin` | `Block` | Adds `IBlockExtension`. No code. |
+| `BlockStateBaseMixin` | `BlockBehaviour.BlockStateBase` | Adds `IBlockStateExtension`. No code. |
+| `BlockEntityMixin` | `BlockEntity` | Adds `IBlockEntityExtension`. No code. |
+| `PlayerMixin` | `Player` | Adds `IPlayerExtension` (`openMenu` with extra data). No code. |
 
 ## Known gaps
 
 None yet.
+
+## Upstream issues fixed in the port (deliberate changes, user approved 2026-10-18)
+
+Marked `Port fix:` in the code. These bugs are in upstream itself, so they also show on NeoForge.
+
+- **Invisible screen labels.** `ChargerContainerScreen` (title and "Structure Level") and `GraderScreen`
+  (title, and the grade of the last attempt) used colors without an alpha byte (`0x404040`, `0xFFFFFF`). In
+  26.x text colors are ARGB and vanilla skips text with alpha 0. Now `0xFF404040` and `0xFFFFFFFF`.
+- **Trident item had no texture.** Upstream's `models/item/trident.json` is still in the pre-1.21.4 format
+  (parent `builtin/entity`, removed from vanilla, and a texture path that is a folder), and the code for its
+  custom renderer is commented out (`FIXME`). The model is now a layered handheld model like the other
+  tools, using the existing `textures/item/trident/` layers (rod, main, highlight) in the tint order of
+  `items/trident.json`. It shows as a flat icon in hand; upstream's intended 3D held model needs the
+  special renderer (milestone M9). `trident_throwing.json` is unused in 26.x and left as is.
+
+## Upstream issues (same on NeoForge, not changed by the port)
+
+- **Block model warnings** for `alloy_forge`, `salvager`, `gear_smithing_table`, `refabricator`,
+  `material_grader` (unused parent texture slots) and `phantom_light` (no blockstate file, it is invisible).
+
+## Fixes after the first M4 runs
+
+- Startup crash: `WindBlastTraitEffect` looked up a tag during init (see M4 notes).
+- World creation crash: `swift_swim` trait used `neoforge:swim_speed` (see open questions, decided).
+- Material Grader, Paint Mixer and Salvager menus would not open: upstream opens them with vanilla's
+  `openMenu(provider)`. NeoForge then sends empty extra data; Fabric refuses to open an extended menu that way.
+  `GraderBlock`, `SalvagerBlock` and `ModContainerBlock` now call `openMenu(provider, buf -> {})`.

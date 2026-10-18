@@ -1,0 +1,15 @@
+classTweaker	v1	official
+# Silent Gear (Fabric port). Access changes that NeoForge provides through its own access
+# transformer, which upstream relies on. One line per member, with the upstream user noted.
+
+# GearSickleItem, IAoeTool: drop experience for blocks broken by area tools
+accessible	method	net/minecraft/world/level/block/Block	popExperience	(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;I)V
+
+# ModContainerBlock, AlloyMakerBlock, StarlightChargerBlock, SgBlockEntities: block entity factories
+accessible	class	net/minecraft/world/level/block/entity/BlockEntityType$BlockEntitySupplier
+# SgBlockEntities: NeoForge makes this constructor public
+accessible	method	net/minecraft/world/level/block/entity/BlockEntityType	<init>	(Lnet/minecraft/world/level/block/entity/BlockEntityType$BlockEntitySupplier;Ljava/util/Set;)V
+# IngredientUtils: NeoForge adds Ingredient.getValues()
+accessible	field	net/minecraft/world/item/crafting/Ingredient	values	Lnet/minecraft/core/HolderSet;
+# KeyTracker: NeoForge adds AbstractContainerScreen.getSlotUnderMouse()
+accessible	field	net/minecraft/client/gui/screens/inventory/AbstractContainerScreen	hoveredSlot	Lnet/minecraft/world/inventory/Slot;

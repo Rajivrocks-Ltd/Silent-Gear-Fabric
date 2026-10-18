@@ -9,7 +9,7 @@
       "attribute_modifiers": {
         "all/any": [
           {
-            "attribute": "neoforge:swim_speed",
+            "attribute": "silentgear:swim_speed",
             "operation": "add_value",
             "values": [
               0.2,

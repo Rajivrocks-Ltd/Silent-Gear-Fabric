@@ -7,6 +7,28 @@ Mojang names (for example `KeyBindingHelper` is now `KeyMappingHelper`, `ItemGro
 
 Abbreviation: `f.a` means `net.fabricmc.fabric.api`.
 
+## Silent Lib stand-ins (built in M2 and M4)
+
+Independent classes in Silent Lib with NeoForge's class and method names. A ported file usually only
+changes its import from the left column to the right column.
+
+| NeoForge | Silent Lib stand-in |
+|---|---|
+| `neoforge.registries.DeferredRegister/DeferredHolder/DeferredItem/DeferredBlock` | `lib.registry.*` (call `register()` instead of `register(IEventBus)`) |
+| `neoforge.common.ItemAbility`, `ItemAbilities` | `lib.port.ItemAbility`, `ItemAbilities` |
+| `neoforge.common.Tags` | `lib.port.Tags` (only the constants in use) |
+| `neoforge.common.util.Lazy` | `lib.port.Lazy` |
+| `neoforge.common.CommonHooks.getCraftingPlayer()` | `lib.port.CommonHooks` |
+| `bus.api.Event`, `EventPriority`, `ICancellableEvent`, `neoforge.common.NeoForge` | `lib.port.event.*` (`addListener` takes the event class) |
+| `neoforge.event.**` (game events) | `lib.port.event.**`, same sub-packages |
+| `neoforge.client.event.*` (registration events, `InputEvent`) | `lib.port.client.event.*` |
+| `neoforge.client.extensions.common.*` | `lib.port.client.extensions.common.*` |
+| `IItemExtension`, `IItemPropertiesExtensions` (`setNoCombineRepair`), `IBlockExtension`, `IBlockStateExtension`, `IBlockEntityExtension`, `IPlayerExtension` (`openMenu`) | `lib.port.*`, injected into the vanilla classes |
+| `neoforge.items.IItemHandler`, `ItemStackHandler`, `ComponentItemHandler`, `SlotItemHandler` | `lib.port.items.*` |
+| `common.crafting.ICustomIngredient`, `IngredientType` | `lib.port.crafting.*` (on Fabric's custom ingredient API) |
+| `network.handling.IPayloadContext`, `network.codec.NeoForgeStreamCodecs` | `lib.port.network.*` |
+| `common.extensions.IMenuTypeExtension`, `network.IContainerFactory` | `lib.port.menu.*` (on Fabric's `ExtendedMenuType`) |
+
 ## Entry, lifecycle, environment
 
 | NeoForge | Fabric | Notes |

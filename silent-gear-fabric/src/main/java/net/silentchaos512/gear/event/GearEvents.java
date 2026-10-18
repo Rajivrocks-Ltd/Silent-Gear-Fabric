@@ -1,0 +1,443 @@
+package net.silentchaos512.gear.event;
+
+import com.google.common.collect.ImmutableList;
+import it.unimi.dsi.fastutil.ints.IntList;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.chicken.Chicken;
+import net.minecraft.world.entity.animal.feline.Cat;
+import net.minecraft.world.entity.animal.fish.Cod;
+import net.minecraft.world.entity.animal.fish.Pufferfish;
+import net.minecraft.world.entity.animal.fish.Salmon;
+import net.minecraft.world.entity.animal.rabbit.Rabbit;
+import net.minecraft.world.entity.animal.wolf.Wolf;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.FireworkRocketEntity;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.FireworkExplosion;
+import net.minecraft.world.item.component.Fireworks;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
+import net.silentchaos512.lib.port.event.EventPriority;
+import net.silentchaos512.lib.port.Tags;
+import net.silentchaos512.lib.port.event.entity.living.*;
+import net.silentchaos512.lib.port.event.entity.player.PlayerEvent;
+import net.silentchaos512.lib.port.event.furnace.FurnaceFuelBurnTimeEvent;
+import net.silentchaos512.lib.port.event.level.BlockDropsEvent;
+import net.silentchaos512.lib.port.event.level.block.BreakBlockEvent;
+import net.silentchaos512.lib.port.event.tick.PlayerTickEvent;
+import net.silentchaos512.gear.SilentGear;
+import net.silentchaos512.gear.api.item.BreakEventHandler;
+import net.silentchaos512.gear.api.item.GearArmor;
+import net.silentchaos512.gear.api.item.GearItem;
+import net.silentchaos512.gear.api.item.GearTool;
+import net.silentchaos512.gear.api.property.GearPropertyValue;
+import net.silentchaos512.gear.api.property.NumberPropertyValue;
+import net.silentchaos512.gear.api.property.TraitListPropertyValue;
+import net.silentchaos512.gear.api.traits.TraitActionContext;
+import net.silentchaos512.gear.api.traits.TraitInstance;
+import net.silentchaos512.gear.setup.SgAttributes;
+import net.silentchaos512.gear.setup.SgCriteriaTriggers;
+import net.silentchaos512.gear.setup.SgRegistries;
+import net.silentchaos512.gear.setup.gear.GearProperties;
+import net.silentchaos512.gear.setup.gear.PartTypes;
+import net.silentchaos512.gear.util.*;
+import net.silentchaos512.lib.event.ServerTicks;
+import net.silentchaos512.lib.port.event.NeoForge;
+
+import javax.annotation.Nullable;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Function;
+
+/**
+ * Gear and trait reactions to game events.
+ *
+ * <p>Port note: upstream subscribes these handlers with {@code @EventBusSubscriber}. Here
+ * {@link #register()} adds them to Silent Lib's {@code NeoForge.EVENT_BUS} stand-in. Handler bodies are
+ * unchanged. Which events are already fired on Fabric is documented on each event class.
+ */
+public final class GearEvents {
+    private GearEvents() {
+    }
+
+    /**
+     * Registers all handlers in this class. Called once from common init.
+     */
+    public static void register() {
+        var bus = NeoForge.EVENT_BUS;
+        bus.addListener(LivingIncomingDamageEvent.class, GearEvents::onLivingIncomingDamage);
+        bus.addListener(LivingDamageEvent.Post.class, GearEvents::onLivingDamagePost);
+        bus.addListener(FurnaceFuelBurnTimeEvent.class, GearEvents::onFurnaceFuelBurnTimeEvent);
+        bus.addListener(LivingDamageEvent.Pre.class, GearEvents::onLivingHurtMagicArmor);
+        bus.addListener(PlayerEvent.BreakSpeed.class, GearEvents::onBreakSpeed);
+        bus.addListener(LivingExperienceDropEvent.class, GearEvents::onXpDrop);
+        bus.addListener(BlockDropsEvent.class, GearEvents::onBlockDrops);
+        bus.addListener(PlayerEvent.ItemCraftedEvent.class, GearEvents::onGearCrafted);
+        bus.addListener(EventPriority.LOWEST, LivingDeathEvent.class, GearEvents::onLivingDeath);
+        bus.addListener(PlayerTickEvent.Pre.class, GearEvents::onPlayerTick);
+        bus.addListener(LivingFallEvent.class, GearEvents::onLivingFall);
+        bus.addListener(LivingDamageEvent.Post.class, GearEvents::onPlayerHurt);
+        bus.addListener(BreakBlockEvent.class, GearEvents::onBlockBreak);
+    }
+
+    //region Damaging traits
+
+    private static final EquipmentSlot[] ARMOR_SLOTS = new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
+
+    public static void onLivingIncomingDamage(LivingIncomingDamageEvent event) {
+        LivingEntity target = event.getEntity();
+        if (target.level().isClientSide()) return;
+
+        DamageSource source = event.getSource();
+        @Nullable Entity attacker = source.getEntity();
+
+        ItemStack weapon = attacker instanceof LivingEntity attackingLivingEntity
+                ? attackingLivingEntity.getItemBySlot(EquipmentSlot.MAINHAND)
+                : ItemStack.EMPTY;
+
+        // Traits that effect the entity being attacked
+        if (attacker instanceof Player attackingPlayer && weapon.getItem() instanceof GearTool) {
+            final float baseDamage = event.getAmount();
+            final float newDamage = TraitHelper.activateTraits(weapon, baseDamage, (trait, value) -> {
+                return trait.getTrait().onAttackEntity(new TraitActionContext(attackingPlayer, trait, weapon), target, value);
+            });
+            event.setAmount(newDamage);
+        }
+
+        // Traits that protect the target entity
+        float incomingDamage = event.getAmount();
+        float newIncomingDamage = event.getAmount();
+        for (EquipmentSlot armorSlot : ARMOR_SLOTS) {
+            ItemStack armor = target.getItemBySlot(armorSlot);
+            if (armor.getItem() instanceof GearArmor) {
+                newIncomingDamage = TraitHelper.activateTraits(armor, newIncomingDamage, (trait, value) -> {
+                    return trait.getTrait().onEntityIncomingDamage(armor, trait.getLevel(), target, source, value, incomingDamage);
+                });
+            }
+        }
+        event.setAmount(newIncomingDamage);
+        if (newIncomingDamage < 0.0001f && event.getOriginalAmount() > 0f) {
+            event.setCanceled(true);
+        }
+    }
+
+    public static void onLivingDamagePost(LivingDamageEvent.Post event) {
+        if (event.getEntity() instanceof Player)
+            if (isFireDamage(event.getSource())) {
+                damageFlammableItems(event);
+            }
+    }
+
+    private static boolean isFireDamage(@Nullable DamageSource source) {
+        return source != null && source.is(DamageTypeTags.IS_FIRE);
+    }
+
+    private static void damageFlammableItems(LivingDamageEvent.Post event) {
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            ItemStack stack = event.getEntity().getItemBySlot(slot);
+            if (GearHelper.isGear(stack) && TraitHelper.hasTrait(stack, Const.Traits.FLAMMABLE)) {
+                GearHelper.attemptDamage(stack, 2, event.getEntity(), slot);
+                checkAndDisplayFlammableItemBroken(event, slot, stack);
+            }
+        }
+    }
+
+    private static void checkAndDisplayFlammableItemBroken(LivingDamageEvent.Post event, EquipmentSlot slot, ItemStack stack) {
+        if (GearHelper.isBroken(stack)) {
+            event.getEntity().onEquippedItemBroken(stack.getItem(), slot);
+            stack.shrink(1);
+            if (event.getEntity() instanceof Player player) {
+                var text = TextUtil.translate("trait", "flammable.itemDestroyed", stack.getHoverName());
+                player.sendSystemMessage(text);
+            }
+        }
+    }
+
+    private static final float BURN_TICKS_PER_DURABILITY = 200f / 50f;
+
+    public static void onFurnaceFuelBurnTimeEvent(FurnaceFuelBurnTimeEvent event) {
+        ItemStack stack = event.getItemStack();
+        if (GearHelper.isGear(stack) && TraitHelper.hasTrait(stack, Const.Traits.FLAMMABLE)) {
+            float durability = stack.getMaxDamage();
+            event.setBurnTime((int) (durability * BURN_TICKS_PER_DURABILITY));
+        }
+    }
+
+    //endregion
+
+    //region Magic armor
+
+    public static void onLivingHurtMagicArmor(LivingDamageEvent.Pre event) {
+        if (event.getSource().is(DamageTypes.MAGIC)) {
+            var attributeInstance = event.getEntity().getAttribute(SgAttributes.MAGIC_ARMOR);
+            float magicArmor = attributeInstance != null ? (float) attributeInstance.getValue() : 0f;
+            float scale = 1f - getReducedMagicDamageScale(magicArmor);
+            event.setNewDamage(event.getNewDamage() * scale);
+        }
+    }
+
+    private static float getReducedMagicDamageScale(float magicArmor) {
+        // Scale linearly up to 60% for magic armor < 20. Above 20, scale half as fast (40 = 90%)
+        if (magicArmor > 20)
+            return 0.6f + 0.015f * (magicArmor - 20);
+        return 0.03f * magicArmor;
+    }
+
+    //endregion
+
+    //region Lustrous trait
+
+    public static void onBreakSpeed(PlayerEvent.BreakSpeed event) {
+        final Player player = event.getEntity();
+        ItemStack tool = player.getMainHandItem();
+
+        if (tool.getItem() instanceof GearItem) {
+            final BlockState state = event.getState();
+
+            if (tool.isCorrectToolForDrops(state)) {
+                int level = TraitHelper.getTraitLevel(tool, Const.Traits.LUSTROUS);
+                int light = getLightForLustrousTrait(player.level(), player.blockPosition());
+                //use getNewSpeed() instead of getOriginalSpeed() to support other mods that are changing the break speed with this event.
+                event.setNewSpeed(event.getNewSpeed() + getLustrousSpeedBonus(level, light));
+            }
+        }
+    }
+
+    public static int getLightForLustrousTrait(Level level, BlockPos pos) {
+        int blockLight = level.getBrightness(LightLayer.BLOCK, pos);
+        int skyLight = level.getBrightness(LightLayer.SKY, pos);
+        // Block light is less effective
+        return Math.max(skyLight, blockLight * 3 / 4);
+    }
+
+    public static int getLustrousSpeedBonus(int level, int light) {
+        return 4 * level * light / 15;
+    }
+
+    // endregion
+
+    public static void onXpDrop(LivingExperienceDropEvent event) {
+        if (event.getAttackingPlayer() == null) return;
+
+        ItemStack tool = event.getAttackingPlayer().getMainHandItem();
+        if (tool.isEmpty() || !(tool.getItem() instanceof GearTool)) return;
+
+        int ancientLevel = TraitHelper.getTraitLevel(tool, Const.Traits.ANCIENT);
+        if (ancientLevel == 0) return;
+
+        int bonusXp = (int) (event.getOriginalExperience() * Const.Traits.ANCIENT_XP_BOOST * ancientLevel);
+        event.setDroppedExperience(event.getDroppedExperience() + bonusXp);
+    }
+
+    private static final List<Function<Level, Entity>> JABBERWOCKY_MOBS = ImmutableList.of(
+            level -> new Wolf(EntityType.WOLF, level),
+            level -> new Cat(EntityType.CAT, level),
+            level -> new Rabbit(EntityType.RABBIT, level),
+            level -> new Chicken(EntityType.CHICKEN, level),
+            level -> new Cod(EntityType.COD, level),
+            level -> new Salmon(EntityType.SALMON, level),
+            level -> new Pufferfish(EntityType.PUFFERFISH, level)
+    );
+
+    public static void onBlockDrops(BlockDropsEvent event) {
+        if (event.getBreaker() == null) return;
+
+        ItemStack tool = event.getTool();
+        if (tool.isEmpty() || !(tool.getItem() instanceof GearTool)) return;
+
+        int ancientLevel = TraitHelper.getTraitLevel(tool, Const.Traits.ANCIENT);
+        if (ancientLevel > 0) {
+            int bonusXp = (int) (event.getDroppedExperience() * Const.Traits.ANCIENT_XP_BOOST * ancientLevel); // TODO: Make it a trait effect
+            event.setDroppedExperience(event.getDroppedExperience() + bonusXp);
+        }
+
+        if (TraitHelper.hasTrait(tool, Const.Traits.JABBERWOCKY) && event.getState().is(Tags.Blocks.ORES_DIAMOND) && !hasSilkTouch(event.getLevel(), tool)) {
+            Entity entity = JABBERWOCKY_MOBS.get(SilentGear.RANDOM.nextInt(JABBERWOCKY_MOBS.size())).apply(event.getBreaker().level());
+            entity.teleportTo(event.getPos().getX() + 0.5, event.getPos().getY(), event.getPos().getZ() + 0.5);
+            event.getLevel().addFreshEntity(entity);
+        }
+    }
+
+    private static boolean hasSilkTouch(Level level, ItemStack tool) {
+        Holder.Reference<Enchantment> silkTouch = level.registryAccess()
+                .lookupOrThrow(Registries.ENCHANTMENT)
+                .getOrThrow(Enchantments.SILK_TOUCH);
+        // Port note: NeoForge adds ItemStack.getEnchantmentLevel; this is the vanilla equivalent.
+        return EnchantmentHelper.getItemEnchantmentLevel(silkTouch, tool) > 0;
+    }
+
+    public static void onGearCrafted(PlayerEvent.ItemCraftedEvent event) {
+        ItemStack result = event.getCrafting();
+
+        if (GearHelper.isGear(result) && event.getEntity() instanceof ServerPlayer player) {
+            // Try to trigger some advancements
+
+            // Crude tool
+            if (GearData.hasPart(result, PartTypes.ROD.get(), p -> {
+                var primaryMaterial = p.getPrimaryMaterial();
+                return primaryMaterial != null && primaryMaterial.is(Const.Materials.WOOD_ROUGH);
+            })) {
+                SgCriteriaTriggers.CRAFTED_WITH_ROUGH_ROD.get().trigger(player);
+            }
+
+            // Repairs
+            int brokenCount = GearData.getBrokenCount(result);
+            int repairedCount = GearData.getRepairedCount(result);
+            SgCriteriaTriggers.GEAR_REPAIRED.get().trigger(player, brokenCount, repairedCount);
+
+            // Number properties
+            for (var propertyType : SgRegistries.GEAR_PROPERTY) {
+                GearPropertyValue<?> property = GearData.getProperties(result, player).get(propertyType);
+                if (property instanceof NumberPropertyValue numberProperty) {
+                    SgCriteriaTriggers.GEAR_PROPERTY.get().trigger(player, propertyType, numberProperty.value());
+                }
+            }
+
+            // Parts
+            SgCriteriaTriggers.HAS_PART.get().trigger(player, result);
+        }
+    }
+
+    public static void onLivingDeath(LivingDeathEvent event) {
+        Entity killer = event.getSource().getEntity();
+        if (killer instanceof Player player && !killer.level().isClientSide()) {
+            if (TraitHelper.hasTraitEitherHand(player, Const.Traits.CONFETTI)) {
+                for (int i = 0; i < 3; ++i) {
+                    FireworkRocketEntity rocket = new FireworkRocketEntity(player.level(), event.getEntity().getX(), event.getEntity().getEyeY(), event.getEntity().getZ(), createRandomFirework());
+                    killer.level().addFreshEntity(rocket);
+                }
+            }
+        }
+    }
+
+    private static ItemStack createRandomFirework() {
+        ItemStack ret = new ItemStack(Items.FIREWORK_ROCKET);
+        int flightDuration = SilentGear.RANDOM.nextInt(3) + 1;
+        var shape = FireworkExplosion.Shape.values()[SilentGear.RANDOM.nextInt(FireworkExplosion.Shape.values().length)];
+        var fireworkColor = DyeColor.values()[SilentGear.RANDOM.nextInt(DyeColor.values().length)].getFireworkColor();
+        var fireworkExplosion = new FireworkExplosion(
+                shape,
+                IntList.of(fireworkColor),
+                IntList.of(),
+                false,
+                false
+        );
+        ret.set(DataComponents.FIREWORKS, new Fireworks(flightDuration, Collections.singletonList(fireworkExplosion)));
+        return ret;
+    }
+
+    public static void onPlayerTick(PlayerTickEvent.Pre event) {
+        var player = event.getEntity();
+        var level = player.level();
+        if (!level.isClientSide()) {
+            // Turtle trait
+            // TODO: May want to add player conditions to wielder effect traits, for more control and possibilities for pack devs.
+            if (!player.isEyeInFluid(FluidTags.WATER) && TraitHelper.hasTrait(player.getItemBySlot(EquipmentSlot.HEAD), Const.Traits.TURTLE)) {
+                // Vanilla duration is 200, but that causes flickering numbers/icon
+                player.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, 210, 0, false, false, true));
+            }
+
+            // Void Ward trait
+            if (player.getY() < level.getMinY() - 32 && TraitHelper.hasTraitArmor(player, Const.Traits.VOID_WARD)) {
+                // A small boost to get the player out of the void, then levitation and slow falling
+                // to allow them to navigate back to safety
+                player.push(0, 20, 0);
+                player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, 400, 3, true, false));
+                player.addEffect(new MobEffectInstance(MobEffects.LEVITATION, 200, 9, true, false));
+            }
+        }
+    }
+
+    public static void onLivingFall(LivingFallEvent event) {
+        ItemStack stack = event.getEntity().getItemBySlot(EquipmentSlot.FEET);
+
+        if (event.getDistance() > 3 && event.getEntity() instanceof Player player) {
+            // Moonwalker fall damage canceling/reduction
+            int moonwalker = TraitHelper.getHighestLevelArmorOrCurio(player, Const.Traits.MOONWALKER);
+            if (moonwalker > 0) {
+                float gravity = 1 + moonwalker * Const.Traits.MOONWALKER_GRAVITY_MOD;
+                event.setDistance(event.getDistance() * gravity);
+
+                if (event.getEntity() instanceof ServerPlayer serverPlayer) {
+                    SgCriteriaTriggers.FALL_WITH_MOONWALKER.get().trigger(serverPlayer);
+                }
+            }
+
+            // Bounce fall damage nullification and bouncing
+            int bounce = TraitHelper.getHighestLevelArmorOrCurio(player, Const.Traits.BOUNCE);
+            if (bounce > 0) {
+                if (!event.getEntity().isSuppressingBounce() && !event.getEntity().isFallFlying()) {
+                    bounceEntity(event.getEntity());
+                    int damage = (int) (event.getDistance() / 3) - 1;
+                    if (damage > 0) {
+                        GearHelper.attemptDamage(stack, damage, event.getEntity(), EquipmentSlot.FEET);
+                    }
+                    event.getEntity().level().playSound(null, event.getEntity().blockPosition(), SoundEvents.SLIME_BLOCK_FALL, SoundSource.PLAYERS, 1f, 1f);
+                    event.setCanceled(true);
+                }
+            }
+        }
+    }
+
+    private static void bounceEntity(Entity entity) {
+        Vec3 movement = entity.getDeltaMovement();
+        if (movement.y < 0) {
+            Vec3 vec = new Vec3(0, -0.75f * movement.y, 0);
+            // Pushing the entity now will do nothing, so we schedule it for the next server tick
+            ServerTicks.scheduleAction(() -> entity.push(vec));
+        }
+    }
+
+    public static void onPlayerHurt(LivingDamageEvent.Post event) {
+        if (event.getEntity() instanceof Player) {
+            Entity source = event.getSource().getDirectEntity();
+            if (source instanceof LivingEntity) {
+                Player player = (Player) event.getEntity();
+                int bounce = TraitHelper.getHighestLevelArmor(player, Const.Traits.BOUNCE);
+                if (bounce > 0) {
+                    SilentGear.LOGGER.debug("knockback");
+                    ((LivingEntity) source).knockback(2 * bounce,
+                            -Mth.sin(source.getYRot() * ((float) Math.PI / 180F)),
+                            Mth.cos(source.getYRot() * ((float) Math.PI / 180F)));
+                }
+            }
+        }
+    }
+
+    public static void onBlockBreak(BreakBlockEvent event) {
+        var player = event.getPlayer();
+        ItemStack tool = player.getMainHandItem();
+        if (tool.getItem() instanceof BreakEventHandler breakEventHandler) {
+            breakEventHandler.onBlockBreakEvent(tool, player, player.level(), event.getPos(), event.getState());
+        }
+
+        var traits = GearData.getProperties(tool, player).getOrDefault(GearProperties.TRAITS, TraitListPropertyValue.empty()).value();
+        for (TraitInstance traitInstance : traits) {
+            traitInstance.getTrait().onBlockBreak(new TraitActionContext(player, traitInstance, tool), event);
+        }
+    }
+}

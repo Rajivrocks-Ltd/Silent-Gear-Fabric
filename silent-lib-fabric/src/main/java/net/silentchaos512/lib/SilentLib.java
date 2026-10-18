@@ -18,6 +18,7 @@ import net.silentchaos512.lib.component.LootContainer;
 import net.silentchaos512.lib.event.Greetings;
 import net.silentchaos512.lib.event.InitialSpawnItems;
 import net.silentchaos512.lib.event.ServerTicks;
+import net.silentchaos512.lib.port.event.FabricEventBridge;
 import net.silentchaos512.lib.world.placement.DimensionFilterPlacement;
 import org.slf4j.Logger;
 
@@ -81,6 +82,7 @@ public final class SilentLib implements ModInitializer {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
                 TeleportCommand.register(dispatcher));
 
+        FabricEventBridge.init();
         ServerTicks.init();
         Greetings.init();
         InitialSpawnItems.init();
