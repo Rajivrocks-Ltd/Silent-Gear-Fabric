@@ -1,0 +1,5 @@
+# Keep the Gradle wrapper script runnable on Linux and macOS
+gradlew text eol=lf
+*.bat text eol=crlf
+*.jar binary
+*.png binary
