@@ -1,0 +1,15 @@
+{
+  "type": "silentgear:gear_crafting",
+  "category": "misc",
+  "ingredients": [
+    {
+      "fabric:type": "silentgear:blueprint",
+      "gear_type": "silentgear:none",
+      "part_type": "silentgear:setting"
+    },
+    "silentgear:necklace_chain"
+  ],
+  "result": {
+    "id": "silentgear:necklace"
+  }
+}

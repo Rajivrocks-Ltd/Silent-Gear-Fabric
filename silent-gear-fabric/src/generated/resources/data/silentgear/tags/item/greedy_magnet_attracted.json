@@ -1,0 +1,11 @@
+{
+  "values": [
+    "#c:gems",
+    "#c:raw_materials",
+    "#c:ores",
+    "#c:ingots",
+    "#c:nuggets",
+    "minecraft:ancient_debris",
+    "minecraft:netherite_scrap"
+  ]
+}

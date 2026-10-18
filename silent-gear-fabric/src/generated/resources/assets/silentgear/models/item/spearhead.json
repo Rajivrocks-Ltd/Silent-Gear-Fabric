@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "silentgear:item/spear/main_hc",
+    "layer1": "silentgear:item/spear/icon_highlight",
+    "layer2": "silentgear:item/part_marker"
+  }
+}

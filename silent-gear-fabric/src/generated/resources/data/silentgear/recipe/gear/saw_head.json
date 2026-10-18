@@ -1,0 +1,39 @@
+{
+  "type": "silentgear:compound_part",
+  "category": "equipment",
+  "ingredients": [
+    {
+      "fabric:type": "silentgear:blueprint",
+      "gear_type": "silentgear:saw",
+      "part_type": "silentgear:main"
+    },
+    {
+      "fabric:type": "silentgear:material",
+      "gear_type": "silentgear:saw",
+      "part_type": "silentgear:main"
+    },
+    {
+      "fabric:type": "silentgear:material",
+      "gear_type": "silentgear:saw",
+      "part_type": "silentgear:main"
+    },
+    {
+      "fabric:type": "silentgear:material",
+      "gear_type": "silentgear:saw",
+      "part_type": "silentgear:main"
+    },
+    {
+      "fabric:type": "silentgear:material",
+      "gear_type": "silentgear:saw",
+      "part_type": "silentgear:main"
+    },
+    {
+      "fabric:type": "silentgear:material",
+      "gear_type": "silentgear:saw",
+      "part_type": "silentgear:main"
+    }
+  ],
+  "result": {
+    "id": "silentgear:saw_blade"
+  }
+}

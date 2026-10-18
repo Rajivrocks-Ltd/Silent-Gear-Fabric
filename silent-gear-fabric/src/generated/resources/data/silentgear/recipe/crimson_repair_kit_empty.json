@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "silentgear:crimson_repair_kit",
+    "#c:rods/wooden"
+  ],
+  "result": {
+    "id": "silentgear:crimson_repair_kit"
+  }
+}

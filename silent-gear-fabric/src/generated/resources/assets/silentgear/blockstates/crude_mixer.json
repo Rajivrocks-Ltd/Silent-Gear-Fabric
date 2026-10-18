@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "silentgear:block/crude_mixer",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "silentgear:block/crude_mixer"
+    },
+    "facing=south": {
+      "model": "silentgear:block/crude_mixer",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "silentgear:block/crude_mixer",
+      "y": 270
+    }
+  }
+}

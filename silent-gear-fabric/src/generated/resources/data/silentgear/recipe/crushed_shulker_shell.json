@@ -1,0 +1,15 @@
+{
+  "type": "silentgear:tool_action",
+  "damage_to_tool": 10,
+  "ingredient": "minecraft:shulker_shell",
+  "result": {
+    "id": "silentgear:crushed_shulker_shell"
+  },
+  "sound": {
+    "pitch": 1.0,
+    "pitch_deviation": 0.1,
+    "sound": "silentgear:block.silentgear.stone_anvil.hammer",
+    "volume": 1.0
+  },
+  "tool": "#c:tools/hammer"
+}

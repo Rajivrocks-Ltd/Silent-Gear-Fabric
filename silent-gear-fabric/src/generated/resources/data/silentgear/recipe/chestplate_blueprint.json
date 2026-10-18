@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "silentgear:blueprints/chestplate",
+  "key": {
+    "#": "#silentgear:blueprint_paper"
+  },
+  "pattern": [
+    "# #",
+    "###",
+    "###"
+  ],
+  "result": {
+    "id": "silentgear:chestplate_blueprint"
+  }
+}

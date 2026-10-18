@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "silentgear:crimson_iron_ingot"
+  ],
+  "result": {
+    "count": 9,
+    "id": "silentgear:crimson_iron_nugget"
+  }
+}

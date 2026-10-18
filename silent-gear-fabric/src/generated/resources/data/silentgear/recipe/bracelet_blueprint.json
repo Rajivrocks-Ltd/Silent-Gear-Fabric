@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "silentgear:blueprints/bracelet",
+  "key": {
+    "#": "#silentgear:blueprint_paper",
+    "/": {
+      "fabric:type": "silentgear:material",
+      "categories": [
+        "metal"
+      ],
+      "gear_type": "silentgear:curio",
+      "part_type": "silentgear:main"
+    }
+  },
+  "pattern": [
+    "###",
+    "/#/"
+  ],
+  "result": {
+    "id": "silentgear:bracelet_blueprint"
+  }
+}

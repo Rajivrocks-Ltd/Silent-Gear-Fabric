@@ -1,0 +1,19 @@
+{
+  "type": "silentgear:compound_part",
+  "category": "misc",
+  "ingredients": [
+    {
+      "fabric:type": "silentgear:blueprint",
+      "gear_type": "silentgear:none",
+      "part_type": "silentgear:grip"
+    },
+    {
+      "fabric:type": "silentgear:material",
+      "gear_type": "silentgear:tool",
+      "part_type": "silentgear:grip"
+    }
+  ],
+  "result": {
+    "id": "silentgear:grip"
+  }
+}

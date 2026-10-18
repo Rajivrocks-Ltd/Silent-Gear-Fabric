@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "silentgear:blueprints/excavator",
+  "key": {
+    "#": "#silentgear:blueprint_paper",
+    "/": "#c:rods/wooden"
+  },
+  "pattern": [
+    "# #",
+    "###",
+    " / "
+  ],
+  "result": {
+    "id": "silentgear:excavator_blueprint"
+  }
+}

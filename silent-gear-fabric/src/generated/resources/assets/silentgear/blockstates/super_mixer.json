@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "silentgear:block/super_mixer",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "silentgear:block/super_mixer"
+    },
+    "facing=south": {
+      "model": "silentgear:block/super_mixer",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "silentgear:block/super_mixer",
+      "y": 270
+    }
+  }
+}

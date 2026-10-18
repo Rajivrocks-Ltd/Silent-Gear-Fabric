@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "#": "#silentgear:fluffy_blocks",
+    "d": "#c:dyes/light_blue"
+  },
+  "pattern": [
+    "###",
+    "#d#",
+    "###"
+  ],
+  "result": {
+    "count": 8,
+    "id": "silentgear:light_blue_fluffy_block"
+  }
+}

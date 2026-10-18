@@ -1,0 +1,14 @@
+{
+  "type": "silentgear:gear_crafting",
+  "category": "equipment",
+  "ingredients": [
+    "silentgear:legging_plates",
+    {
+      "fabric:type": "silentgear:part_type",
+      "part_type": "silentgear:lining"
+    }
+  ],
+  "result": {
+    "id": "silentgear:leggings"
+  }
+}

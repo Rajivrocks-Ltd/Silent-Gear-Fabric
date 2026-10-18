@@ -1,0 +1,8 @@
+{
+  "type": "silentgear:smithing/upgrade",
+  "addition": {
+    "fabric:type": "silentgear:part_type",
+    "part_type": "silentgear:misc_upgrade"
+  },
+  "gear": "silentgear:helmet"
+}

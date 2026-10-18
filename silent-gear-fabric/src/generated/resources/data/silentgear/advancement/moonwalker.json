@@ -1,0 +1,47 @@
+{
+  "parent": "silentgear:azure_silver",
+  "criteria": {
+    "fall_with_moonwalker_boots": {
+      "trigger": "silentgear:fall_with_moonwalker"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.silentgear.moonwalker.description"
+    },
+    "icon": {
+      "components": {
+        "silentgear:construction": {
+          "broken_count": 0,
+          "example": false,
+          "parts": [
+            {
+              "item": {
+                "components": {
+                  "silentgear:material_list": [
+                    {
+                      "material": "silentgear:azure_silver"
+                    }
+                  ]
+                },
+                "id": "silentgear:boot_plates"
+              },
+              "part": "silentgear:boot_plates"
+            }
+          ],
+          "repairedCount": 0
+        }
+      },
+      "id": "silentgear:boots"
+    },
+    "title": {
+      "translate": "advancements.silentgear.moonwalker.title"
+    }
+  },
+  "requirements": [
+    [
+      "fall_with_moonwalker_boots"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

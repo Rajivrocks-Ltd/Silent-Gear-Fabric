@@ -34,6 +34,13 @@ sourceSets.main.resources {
 	// Development only files that should not ship in the jar.
 	exclude("**/*.bbmodel")
 	exclude("**/.cache")
+
+	// TEMPORARY (milestone M3 only, remove in M4): leave the data pack files out of the jar.
+	// They refer to Silent Gear blocks and items that are registered in M4. Until then, the
+	// worldgen files would stop worlds from loading, and the vanilla tags that list our blocks
+	// (for example minecraft:mineable/pickaxe) would be dropped entirely. The files stay in
+	// src/ and are checked for JSON errors offline.
+	exclude("data/**")
 }
 
 loom {

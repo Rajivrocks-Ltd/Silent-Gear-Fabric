@@ -1,0 +1,34 @@
+{
+  "type": "silentgear:conversion",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:diamond_boots"
+  ],
+  "result": {
+    "item": "silentgear:boots",
+    "parts": [
+      {
+        "item": {
+          "components": {
+            "silentgear:material_list": [
+              {
+                "material": "silentgear:diamond"
+              },
+              {
+                "material": "silentgear:diamond"
+              },
+              {
+                "material": "silentgear:diamond"
+              },
+              {
+                "material": "silentgear:diamond"
+              }
+            ]
+          },
+          "id": "silentgear:boot_plates"
+        },
+        "part": "silentgear:boot_plates"
+      }
+    ]
+  }
+}

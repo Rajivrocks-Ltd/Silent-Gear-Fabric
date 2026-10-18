@@ -1,0 +1,6 @@
+{
+  "parent": "silentlib:block/cross_cutout",
+  "textures": {
+    "cross": "silentgear:block/netherwood_sapling"
+  }
+}

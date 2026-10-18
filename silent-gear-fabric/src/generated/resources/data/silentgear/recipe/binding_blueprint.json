@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "silentgear:blueprints/binding",
+  "ingredients": [
+    "#silentgear:blueprint_paper",
+    {
+      "fabric:type": "silentgear:material",
+      "gear_type": "silentgear:tool",
+      "part_type": "silentgear:binding"
+    },
+    {
+      "fabric:type": "silentgear:material",
+      "gear_type": "silentgear:tool",
+      "part_type": "silentgear:binding"
+    }
+  ],
+  "result": {
+    "id": "silentgear:binding_blueprint"
+  }
+}

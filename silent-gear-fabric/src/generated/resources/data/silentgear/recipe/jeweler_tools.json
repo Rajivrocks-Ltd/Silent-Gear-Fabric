@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "#silentgear:blueprint_paper",
+    "d": "#c:gems/diamond",
+    "i": "#c:ingots/iron",
+    "p": "#minecraft:planks",
+    "s": "#c:rods/wooden"
+  },
+  "pattern": [
+    "  p",
+    "d#s",
+    "ips"
+  ],
+  "result": {
+    "id": "silentgear:jeweler_tools"
+  }
+}

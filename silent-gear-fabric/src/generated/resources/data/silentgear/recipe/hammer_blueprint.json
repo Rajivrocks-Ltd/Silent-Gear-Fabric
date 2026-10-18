@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "silentgear:blueprints/hammer",
+  "key": {
+    "#": "#silentgear:blueprint_paper",
+    "/": "#c:rods/wooden"
+  },
+  "pattern": [
+    "###",
+    "###",
+    " / "
+  ],
+  "result": {
+    "id": "silentgear:hammer_blueprint"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "#silentgear:blueprint_paper",
+    "H": "minecraft:heart_of_the_sea",
+    "T": "minecraft:trident"
+  },
+  "pattern": [
+    "#H#",
+    "#T#",
+    " # "
+  ],
+  "result": {
+    "id": "silentgear:trident_blueprint"
+  }
+}

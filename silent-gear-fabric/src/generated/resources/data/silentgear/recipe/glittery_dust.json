@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "#c:dusts/glowstone",
+    "/": "#c:nuggets/emerald",
+    "b": "silentgear:nether_banana",
+    "o": "minecraft:popped_chorus_fruit"
+  },
+  "pattern": [
+    "o/o",
+    "#b#",
+    "o/o"
+  ],
+  "result": {
+    "count": 8,
+    "id": "silentgear:glittery_dust"
+  }
+}

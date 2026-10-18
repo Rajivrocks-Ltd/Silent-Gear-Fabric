@@ -1,0 +1,30 @@
+{
+  "type": "silentgear:compound_part",
+  "category": "misc",
+  "ingredients": [
+    {
+      "fabric:type": "silentgear:blueprint",
+      "gear_type": "silentgear:ring",
+      "part_type": "silentgear:main"
+    },
+    {
+      "fabric:type": "silentgear:material",
+      "categories": [
+        "metal"
+      ],
+      "gear_type": "silentgear:ring",
+      "part_type": "silentgear:main"
+    },
+    {
+      "fabric:type": "silentgear:material",
+      "categories": [
+        "metal"
+      ],
+      "gear_type": "silentgear:ring",
+      "part_type": "silentgear:main"
+    }
+  ],
+  "result": {
+    "id": "silentgear:ring_shank"
+  }
+}

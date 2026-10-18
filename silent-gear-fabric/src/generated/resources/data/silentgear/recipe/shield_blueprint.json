@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "silentgear:blueprints/shield",
+  "key": {
+    "#": "#silentgear:blueprint_paper",
+    "/": "#c:rods/wooden",
+    "@": "#c:ingots/iron"
+  },
+  "pattern": [
+    "#@#",
+    "///",
+    " # "
+  ],
+  "result": {
+    "id": "silentgear:shield_blueprint"
+  }
+}

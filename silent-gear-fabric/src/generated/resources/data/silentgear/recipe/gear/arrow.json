@@ -1,0 +1,18 @@
+{
+  "type": "silentgear:gear_crafting",
+  "category": "equipment",
+  "ingredients": [
+    "silentgear:arrow_heads",
+    {
+      "fabric:type": "silentgear:part_type",
+      "part_type": "silentgear:rod"
+    },
+    {
+      "fabric:type": "silentgear:part_type",
+      "part_type": "silentgear:fletching"
+    }
+  ],
+  "result": {
+    "id": "silentgear:arrow"
+  }
+}

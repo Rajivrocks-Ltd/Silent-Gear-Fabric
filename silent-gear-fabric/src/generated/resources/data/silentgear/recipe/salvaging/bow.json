@@ -1,0 +1,14 @@
+{
+  "type": "silentgear:salvaging",
+  "ingredient": "minecraft:bow",
+  "results": [
+    {
+      "count": 3,
+      "id": "minecraft:string"
+    },
+    {
+      "count": 3,
+      "id": "minecraft:stick"
+    }
+  ]
+}

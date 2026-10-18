@@ -103,6 +103,52 @@ Every diff in this port is against these commits. They live in `reference/` (git
   Check cutout blocks (crops, flowers) visually in M4.
 - `pack.mcmeta` not copied: Fabric generates mod resource pack metadata.
 
+### 2026-10-18 (M3, resources)
+
+- Copied upstream `src/main/resources` (assets, data) and `src/generated/resources` into
+  `silent-gear-fabric/src/main/resources` and `silent-gear-fabric/src/generated/resources`.
+  No path exists in both folders. 3,285 upstream files, 15 left out (below), our `fabric.mod.json` added.
+- **Not copied** (NeoForge-only, the originals stay in `reference/`):
+
+  | Upstream file(s) | Becomes | Milestone |
+  |---|---|---|
+  | `META-INF/neoforge.mods.toml`, `META-INF/accesstransformer.cfg` (empty) | `fabric.mod.json` | done in M0 |
+  | `silentgear.mixins.json` (lists no mixins) | a Fabric mixin config, created with the first mixin | when needed |
+  | `data/silentgear/neoforge/biome_modifier/{overworld,nether,end}_ores.json` | `BiomeModifications.addFeature` in code | M4 |
+  | `data/silentgear/loot_modifiers/add_mob_drops/*.json` (5, `neoforge:add_table`) | `LootTableEvents.MODIFY` in code | M8 |
+  | `data/silentgear/loot_modifiers/{bonus_drops_trait,magmatic_smelting}.json` | code, see API_MAPPING "Loot and world" | M8 |
+  | `data/neoforge/data_maps/item/{furnace_fuels,compostables}.json` | `FuelValueEvents`, `CompostableRegistry` in code | M4 |
+
+  Biome modifier contents, for M4: overworld `underground_ores` gets `silentgear:bort_ore`,
+  `silentgear:wild_flax`, `silentgear:wild_fluffy` in `#minecraft:is_overworld`. Check the nether and
+  end files in `reference/` for their lists when porting.
+- **Patched:**
+  - `"neoforge:ingredient_type"` renamed to `"fabric:type"` in 218 files (488 uses). Fabric's custom
+    ingredient codec reads the type key and the ingredient's fields inline, exactly like NeoForge, so
+    nothing else changes. Ingredient types used, to register in M7: `silentgear:blueprint` (78),
+    `silentgear:custom_compound` (3), `silentgear:material` (248), `silentgear:optional_tag` (52),
+    `silentgear:part_type` (107).
+  - `recipe/sapling/netherwood.json`: NeoForge `mod_loaded` condition replaced with
+    `"fabric:load_conditions": [{"condition": "fabric:all_mods_loaded", "values": ["bonsaitrees2"]}]`.
+- **Kept as is:** `data/neoforge/tags/block/needs_netherite_tool.json` (tags load for any namespace),
+  `swift_swim.json` with `neoforge:swim_speed` (open question below), the 14 `render_type` model keys
+  (redundant, see M2), and data for other mods (`curios`, `patchouli_books`, `weapon_attributes`, `mmorpg`).
+- **Tag check:** 53 `c:` tags used by Silent Gear are defined by neither Fabric API nor Silent Gear. All are
+  metals from other mods (tin, silver, steel, ...), and every use is an `optional_tag` ingredient or an
+  optional tag entry. NeoForge does not define them either, so behavior is the same.
+- **Offline JSON check:** all 2,291 JSON files parse in strict mode, no NeoForge keys left except `swim_speed`.
+- **TEMPORARY: `data/**` is excluded from the build** (`silent-gear-fabric/build.gradle`). The data files
+  refer to blocks and items registered in M4. Without them, the worldgen files stop worlds from loading and
+  vanilla tags that list our blocks get dropped. **Remove the exclude in M4.**
+- **Expected client log errors until M9:** 86 of the 303 item model files use Silent Gear's custom tint
+  sources (`silentgear:gear_part` 71 uses, `silentgear:material` 51, `silentgear:paint_color` 1). They fail to
+  load until the tint sources are registered in M9.
+- `optional_data_packs/` (upstream repo root) is a pack players install by hand, not loaded by code. Not ported.
+- M3 test passed. Only expected log entries: 86 item model errors (logged once per resource reload) and
+  vanilla texture warnings for 6 Silent Gear block models. The block models use `minecraft:block/orientable`
+  as parent but draw their own elements, so the parent's texture slots stay empty. This comes from vanilla
+  model loading and happens on NeoForge too. Upstream data is left unchanged.
+
 ## Findings that change the plan
 
 - **Gear rendering is data-driven in 26.1.** Upstream has 303 item model definition files plus 3 custom

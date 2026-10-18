@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "#c:ingots/iron",
+    "/": "#c:rods/iron",
+    "o": "#c:gems/diamond"
+  },
+  "pattern": [
+    " / ",
+    "#o#",
+    "###"
+  ],
+  "result": {
+    "id": "silentgear:sturdy_repair_kit"
+  }
+}

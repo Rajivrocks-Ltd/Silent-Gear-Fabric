@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "#silentgear:blueprint_paper",
+    "/": "#c:rods/breeze"
+  },
+  "pattern": [
+    " # ",
+    "###",
+    " / "
+  ],
+  "result": {
+    "id": "silentgear:mace_blueprint"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "silentgear:item/chestplate/main_generic_hc",
+    "layer1": "silentgear:item/chestplate/_highlight"
+  }
+}

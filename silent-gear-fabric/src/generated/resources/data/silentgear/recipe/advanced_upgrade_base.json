@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "/": "#c:nuggets/diamond",
+    "D": "#c:dyes/blue",
+    "G": "#c:nuggets/gold",
+    "U": "silentgear:upgrade_base"
+  },
+  "pattern": [
+    "///",
+    "DUD",
+    "GGG"
+  ],
+  "result": {
+    "id": "silentgear:advanced_upgrade_base"
+  }
+}

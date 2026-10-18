@@ -1,0 +1,32 @@
+{
+  "parent": "silentgear:root",
+  "criteria": {
+    "get_item": {
+      "conditions": {
+        "items": [
+          {
+            "items": "silentgear:stone_anvil"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.silentgear.stone_anvil.description"
+    },
+    "icon": {
+      "id": "silentgear:stone_anvil"
+    },
+    "title": {
+      "translate": "advancements.silentgear.stone_anvil.title"
+    }
+  },
+  "requirements": [
+    [
+      "get_item"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

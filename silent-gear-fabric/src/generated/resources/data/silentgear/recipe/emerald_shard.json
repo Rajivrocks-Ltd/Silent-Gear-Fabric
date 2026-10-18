@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "#c:gems/emerald"
+  ],
+  "result": {
+    "count": 9,
+    "id": "silentgear:emerald_shard"
+  }
+}

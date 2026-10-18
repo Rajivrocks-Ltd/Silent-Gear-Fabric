@@ -1,0 +1,14 @@
+{
+  "type": "silentgear:salvaging",
+  "ingredient": "minecraft:iron_hoe",
+  "results": [
+    {
+      "count": 2,
+      "id": "minecraft:iron_ingot"
+    },
+    {
+      "count": 2,
+      "id": "minecraft:stick"
+    }
+  ]
+}

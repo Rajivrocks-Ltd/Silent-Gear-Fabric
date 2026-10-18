@@ -1,0 +1,32 @@
+{
+  "parent": "silentgear:root",
+  "criteria": {
+    "get_item": {
+      "conditions": {
+        "items": [
+          {
+            "items": "silentgear:blueprint_paper"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.silentgear.blueprint_paper.description"
+    },
+    "icon": {
+      "id": "silentgear:blueprint_paper"
+    },
+    "title": {
+      "translate": "advancements.silentgear.blueprint_paper.title"
+    }
+  },
+  "requirements": [
+    [
+      "get_item"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

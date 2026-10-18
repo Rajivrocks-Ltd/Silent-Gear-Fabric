@@ -1,0 +1,10 @@
+{
+  "type": "silentgear:salvaging",
+  "ingredient": "minecraft:diamond_helmet",
+  "results": [
+    {
+      "count": 5,
+      "id": "minecraft:diamond"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "silentgear:raw_crimson_iron_block"
+  ],
+  "result": {
+    "count": 9,
+    "id": "silentgear:raw_crimson_iron"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "#c:storage_blocks/tyrian_steel",
+    "B": "minecraft:beacon",
+    "D": {
+      "fabric:type": "silentgear:custom_compound",
+      "item": "silentgear:custom_gem",
+      "material": "silentgear:dimerald"
+    }
+  },
+  "pattern": [
+    "#D#",
+    "#B#",
+    " # "
+  ],
+  "result": {
+    "id": "silentgear:super_mixer"
+  }
+}

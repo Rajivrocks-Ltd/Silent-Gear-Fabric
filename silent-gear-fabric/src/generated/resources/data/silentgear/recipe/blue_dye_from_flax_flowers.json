@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "silentgear:flax_flowers",
+    "silentgear:flax_flowers",
+    "silentgear:flax_flowers",
+    "silentgear:flax_flowers"
+  ],
+  "result": {
+    "id": "minecraft:blue_dye"
+  }
+}

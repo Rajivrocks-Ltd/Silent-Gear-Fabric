@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "silentgear:blueprints/prospector_hammer",
+  "key": {
+    "#": "#silentgear:template_boards",
+    "/": "#c:rods/wooden",
+    "@": "#c:ingots/iron"
+  },
+  "pattern": [
+    "##",
+    " /",
+    " @"
+  ],
+  "result": {
+    "id": "silentgear:prospector_hammer_template"
+  }
+}

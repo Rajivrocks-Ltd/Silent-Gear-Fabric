@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "#c:dusts/azure_electrum",
+    "#c:dusts/azure_silver",
+    "#c:dusts/azure_silver",
+    "#c:dusts/blaze_gold",
+    "silentgear:nether_star_fragment"
+  ],
+  "result": {
+    "count": 3,
+    "id": "silentgear:starmetal_dust"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "minecraft:polished_blackstone",
+    "/": "#c:storage_blocks/blaze_gold",
+    "g": "#c:glass_blocks/colorless",
+    "q": "minecraft:quartz_block"
+  },
+  "pattern": [
+    "qgq",
+    "#g#",
+    "#/#"
+  ],
+  "result": {
+    "id": "silentgear:starlight_charger"
+  }
+}

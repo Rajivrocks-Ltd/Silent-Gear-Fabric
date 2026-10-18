@@ -1,0 +1,108 @@
+{
+  "criteria": {
+    "get_item": {
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:crafting_table"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "background": "minecraft:gui/advancements/backgrounds/adventure",
+    "description": {
+      "translate": "advancements.silentgear.root.description"
+    },
+    "icon": {
+      "components": {
+        "silentgear:construction": {
+          "broken_count": 0,
+          "example": false,
+          "parts": [
+            {
+              "item": {
+                "components": {
+                  "silentgear:material_list": [
+                    {
+                      "material": "silentgear:crimson_steel"
+                    }
+                  ]
+                },
+                "id": "silentgear:pickaxe_head"
+              },
+              "part": "silentgear:pickaxe_head"
+            },
+            {
+              "item": {
+                "components": {
+                  "silentgear:material_list": [
+                    {
+                      "material": "silentgear:blaze_gold"
+                    }
+                  ]
+                },
+                "id": "silentgear:rod"
+              },
+              "part": "silentgear:rod"
+            },
+            {
+              "item": {
+                "components": {
+                  "silentgear:material_list": [
+                    {
+                      "material": "silentgear:azure_electrum"
+                    }
+                  ]
+                },
+                "id": "silentgear:tip"
+              },
+              "part": "silentgear:tip"
+            },
+            {
+              "item": {
+                "components": {
+                  "silentgear:material_list": [
+                    {
+                      "material": "silentgear:wool/black"
+                    }
+                  ]
+                },
+                "id": "silentgear:grip"
+              },
+              "part": "silentgear:grip"
+            },
+            {
+              "item": {
+                "components": {
+                  "silentgear:material_list": [
+                    {
+                      "material": "silentgear:string"
+                    }
+                  ]
+                },
+                "id": "silentgear:binding"
+              },
+              "part": "silentgear:binding"
+            }
+          ],
+          "repairedCount": 0
+        }
+      },
+      "id": "silentgear:pickaxe"
+    },
+    "show_toast": false,
+    "title": {
+      "translate": "advancements.silentgear.root.title"
+    }
+  },
+  "requirements": [
+    [
+      "get_item"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

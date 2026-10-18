@@ -1,0 +1,10 @@
+{
+  "type": "silentgear:salvaging",
+  "ingredient": "minecraft:leather_boots",
+  "results": [
+    {
+      "count": 4,
+      "id": "minecraft:leather"
+    }
+  ]
+}

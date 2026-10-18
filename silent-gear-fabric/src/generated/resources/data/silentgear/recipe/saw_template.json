@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "silentgear:blueprints/saw",
+  "key": {
+    "#": "#silentgear:template_boards",
+    "/": "#c:rods/wooden"
+  },
+  "pattern": [
+    "###",
+    "##/",
+    "  /"
+  ],
+  "result": {
+    "id": "silentgear:saw_template"
+  }
+}

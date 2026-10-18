@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "silentgear:blueprints/arrow",
+  "key": {
+    "#": "#silentgear:blueprint_paper",
+    "/": "#c:rods/wooden",
+    "@": "#c:feathers"
+  },
+  "pattern": [
+    "#",
+    "/",
+    "@"
+  ],
+  "result": {
+    "id": "silentgear:arrow_blueprint"
+  }
+}

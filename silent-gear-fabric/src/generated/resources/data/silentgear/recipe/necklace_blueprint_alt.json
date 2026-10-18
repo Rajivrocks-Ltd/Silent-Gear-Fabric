@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "silentgear:blueprints/necklace",
+  "key": {
+    "#": "#silentgear:blueprint_paper",
+    "/": "#c:ingots/gold"
+  },
+  "pattern": [
+    "/#/",
+    "# #",
+    "###"
+  ],
+  "result": {
+    "id": "silentgear:necklace_blueprint"
+  }
+}

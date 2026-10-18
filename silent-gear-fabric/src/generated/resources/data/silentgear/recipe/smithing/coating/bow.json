@@ -1,0 +1,10 @@
+{
+  "type": "silentgear:smithing/coating",
+  "addition": {
+    "fabric:type": "silentgear:material",
+    "gear_type": "silentgear:tool",
+    "part_type": "silentgear:coating"
+  },
+  "gear": "silentgear:bow",
+  "template": "silentgear:coating_smithing_template"
+}

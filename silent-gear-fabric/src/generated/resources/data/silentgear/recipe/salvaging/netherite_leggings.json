@@ -1,0 +1,13 @@
+{
+  "type": "silentgear:salvaging",
+  "ingredient": "minecraft:netherite_leggings",
+  "results": [
+    {
+      "count": 7,
+      "id": "minecraft:diamond"
+    },
+    {
+      "id": "minecraft:netherite_ingot"
+    }
+  ]
+}

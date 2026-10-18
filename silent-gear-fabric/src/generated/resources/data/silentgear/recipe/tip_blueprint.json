@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "group": "silentgear:blueprints/tip",
+  "ingredients": [
+    "#silentgear:blueprint_paper",
+    "#silentgear:blueprint_paper",
+    "#c:paper",
+    "#c:stones"
+  ],
+  "result": {
+    "id": "silentgear:tip_blueprint"
+  }
+}

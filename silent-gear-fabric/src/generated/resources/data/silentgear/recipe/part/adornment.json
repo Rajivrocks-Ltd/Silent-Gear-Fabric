@@ -1,0 +1,20 @@
+{
+  "type": "silentgear:compound_part",
+  "category": "misc",
+  "ingredients": [
+    {
+      "fabric:type": "silentgear:blueprint",
+      "gear_type": "silentgear:none",
+      "part_type": "silentgear:setting"
+    },
+    "silentgear:bort",
+    {
+      "fabric:type": "silentgear:material",
+      "gear_type": "silentgear:tool",
+      "part_type": "silentgear:setting"
+    }
+  ],
+  "result": {
+    "id": "silentgear:setting"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "silentgear:blueprints/sickle",
+  "key": {
+    "#": "#silentgear:blueprint_paper",
+    "/": "#c:rods/wooden"
+  },
+  "pattern": [
+    " #",
+    "##",
+    "/ "
+  ],
+  "result": {
+    "id": "silentgear:sickle_blueprint"
+  }
+}

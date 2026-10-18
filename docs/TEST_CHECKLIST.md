@@ -43,7 +43,22 @@ Do not copy the `-sources.jar` files.
 - [x] Save and quit: no errors in the log
 - Reopen check moved to M4, where starter items first write to the persisted player data
 
+### M3 resources (passed 2026-10-18 with `runClient`)
+Data pack files are left out of the build until M4, so this checks the client assets only.
+- [x] `runClient` reaches the title screen
+- [x] Options > Language: pick another language (for example Deutsch), then switch back. No crash
+- [x] Open the existing test world (or create one): it loads, no errors from silentlib or silentgear
+      other than the expected item model ones (see below)
+- [x] Save and quit to the title screen, then close the game
+- Known upstream warnings, same on NeoForge: "Unresolved texture references" for block models
+  `alloy_forge`, `salvager`, `gear_smithing_table`, `refabricator`, and "Missing texture references"
+  for `gear_smithing_table`, `material_grader`. Compare with instance A when it is set up.
+- Expected in the log until M9: errors about 86 `silentgear` item models with unknown
+  `silentgear:gear_part`, `silentgear:material` or `silentgear:paint_color` types. Claude filters these.
+
 ### M4 registries and basic content (to be expanded when M4 is done)
+- [ ] Data pack files are back in the build (the M3 exclude is removed). `/reload` shows no
+      Silent Gear errors except for recipes, materials, parts and traits that need M5 or M7 code
 - [ ] New world: you receive the starter blueprint package once. Save, quit, reopen the world:
       you do **not** receive it again (tests Silent Lib's persisted player data)
 - [ ] Cutout blocks (flax and fluffy crops, flowers, saplings) render with transparent pixels, not black

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "silentgear:pebble",
+    "silentgear:pebble",
+    "silentgear:pebble",
+    "silentgear:pebble",
+    "silentgear:pebble",
+    "silentgear:pebble",
+    "silentgear:pebble",
+    "silentgear:pebble",
+    "silentgear:pebble"
+  ],
+  "result": {
+    "id": "minecraft:cobblestone"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "type": "silentgear:compound_part",
+  "category": "misc",
+  "ingredients": [
+    {
+      "fabric:type": "silentgear:blueprint",
+      "gear_type": "silentgear:none",
+      "part_type": "silentgear:cord"
+    },
+    {
+      "fabric:type": "silentgear:material",
+      "gear_type": "silentgear:tool",
+      "part_type": "silentgear:cord"
+    },
+    {
+      "fabric:type": "silentgear:material",
+      "gear_type": "silentgear:tool",
+      "part_type": "silentgear:cord"
+    },
+    {
+      "fabric:type": "silentgear:material",
+      "gear_type": "silentgear:tool",
+      "part_type": "silentgear:cord"
+    }
+  ],
+  "result": {
+    "id": "silentgear:cord"
+  }
+}

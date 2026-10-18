@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "silentgear:blueprints/dagger",
+  "key": {
+    "#": "#silentgear:template_boards",
+    "/": "#c:rods/wooden"
+  },
+  "pattern": [
+    "#",
+    "/"
+  ],
+  "result": {
+    "id": "silentgear:dagger_template"
+  }
+}

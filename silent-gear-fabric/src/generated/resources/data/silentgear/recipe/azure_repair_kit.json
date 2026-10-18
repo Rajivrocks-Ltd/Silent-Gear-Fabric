@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "#c:ingots/azure_electrum",
+    "/": "minecraft:end_rod",
+    "o": "#c:gems/emerald"
+  },
+  "pattern": [
+    " / ",
+    "#o#",
+    "###"
+  ],
+  "result": {
+    "id": "silentgear:azure_repair_kit"
+  }
+}

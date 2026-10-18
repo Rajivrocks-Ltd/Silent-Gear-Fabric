@@ -1,0 +1,18 @@
+{
+  "type": "silentgear:gear_crafting",
+  "category": "equipment",
+  "ingredients": [
+    "silentgear:slingshot_limbs",
+    {
+      "fabric:type": "silentgear:part_type",
+      "part_type": "silentgear:rod"
+    },
+    {
+      "fabric:type": "silentgear:part_type",
+      "part_type": "silentgear:cord"
+    }
+  ],
+  "result": {
+    "id": "silentgear:slingshot"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "silentgear:blueprints/sword",
+  "key": {
+    "#": "#silentgear:template_boards",
+    "/": "#c:rods/wooden"
+  },
+  "pattern": [
+    "#",
+    "#",
+    "/"
+  ],
+  "result": {
+    "id": "silentgear:sword_template"
+  }
+}

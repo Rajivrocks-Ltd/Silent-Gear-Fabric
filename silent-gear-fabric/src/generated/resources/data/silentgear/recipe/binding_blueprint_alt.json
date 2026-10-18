@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "silentgear:blueprints/binding",
+  "ingredients": [
+    "#silentgear:blueprint_paper",
+    "#c:strings",
+    "#c:strings"
+  ],
+  "result": {
+    "id": "silentgear:binding_blueprint"
+  }
+}

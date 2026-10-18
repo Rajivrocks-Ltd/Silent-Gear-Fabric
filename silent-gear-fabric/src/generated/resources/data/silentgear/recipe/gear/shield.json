@@ -1,0 +1,14 @@
+{
+  "type": "silentgear:gear_crafting",
+  "category": "equipment",
+  "ingredients": [
+    "silentgear:shield_plate",
+    {
+      "fabric:type": "silentgear:part_type",
+      "part_type": "silentgear:rod"
+    }
+  ],
+  "result": {
+    "id": "silentgear:shield"
+  }
+}

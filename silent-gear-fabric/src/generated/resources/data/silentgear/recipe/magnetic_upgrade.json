@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "silentgear:advanced_upgrade_base",
+    "/": "#c:rods/breeze",
+    "c": "#c:ingots/crimson_steel",
+    "i": "#c:ingots/iron"
+  },
+  "pattern": [
+    "i i",
+    "c c",
+    "#c/"
+  ],
+  "result": {
+    "id": "silentgear:magnetic_upgrade"
+  }
+}

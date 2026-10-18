@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "#": "#c:cobblestones",
+    "/": "silentgear:crude_tool_parts"
+  },
+  "pattern": [
+    "##",
+    " /"
+  ],
+  "result": {
+    "id": "silentgear:crude_hammer"
+  }
+}

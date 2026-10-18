@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "silentgear:fluffy_puff",
+    "~": "#c:strings"
+  },
+  "pattern": [
+    "###",
+    "#~#",
+    "###"
+  ],
+  "result": {
+    "id": "minecraft:white_wool"
+  }
+}

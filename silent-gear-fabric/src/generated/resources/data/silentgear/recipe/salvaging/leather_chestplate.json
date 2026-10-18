@@ -1,0 +1,10 @@
+{
+  "type": "silentgear:salvaging",
+  "ingredient": "minecraft:leather_chestplate",
+  "results": [
+    {
+      "count": 8,
+      "id": "minecraft:leather"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "type": "silentgear:gear_crafting",
+  "category": "misc",
+  "ingredients": [
+    {
+      "fabric:type": "silentgear:blueprint",
+      "gear_type": "silentgear:none",
+      "part_type": "silentgear:setting"
+    },
+    "silentgear:ring_shank",
+    {
+      "fabric:type": "silentgear:part_type",
+      "part_type": "silentgear:setting"
+    }
+  ],
+  "result": {
+    "id": "silentgear:ring"
+  }
+}

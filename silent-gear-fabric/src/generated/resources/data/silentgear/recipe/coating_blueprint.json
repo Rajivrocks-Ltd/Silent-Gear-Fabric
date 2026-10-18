@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "group": "silentgear:blueprints/coating",
+  "ingredients": [
+    "#silentgear:blueprint_paper",
+    "#silentgear:blueprint_paper",
+    "#silentgear:blueprint_paper",
+    "#silentgear:blueprint_paper",
+    "#c:gems/diamond",
+    "#c:gems/emerald"
+  ],
+  "result": {
+    "id": "silentgear:coating_blueprint"
+  }
+}

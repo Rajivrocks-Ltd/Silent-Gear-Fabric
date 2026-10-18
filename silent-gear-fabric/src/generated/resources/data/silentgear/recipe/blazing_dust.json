@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "#c:dusts/blaze_gold",
+    "#c:dusts/glowstone",
+    "#c:dusts/glowstone"
+  ],
+  "result": {
+    "count": 4,
+    "id": "silentgear:blazing_dust"
+  }
+}

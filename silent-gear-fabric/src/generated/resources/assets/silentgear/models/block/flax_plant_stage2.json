@@ -1,0 +1,6 @@
+{
+  "parent": "silentlib:block/crop_cutout",
+  "textures": {
+    "crop": "silentgear:block/flax_plant_stage2"
+  }
+}

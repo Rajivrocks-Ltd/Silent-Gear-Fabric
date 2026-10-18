@@ -1,0 +1,10 @@
+{
+  "type": "silentgear:salvaging",
+  "ingredient": "minecraft:iron_helmet",
+  "results": [
+    {
+      "count": 5,
+      "id": "minecraft:iron_ingot"
+    }
+  ]
+}

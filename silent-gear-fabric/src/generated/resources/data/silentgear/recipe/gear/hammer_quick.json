@@ -1,0 +1,48 @@
+{
+  "type": "silentgear:gear_crafting",
+  "category": "equipment",
+  "ingredients": [
+    {
+      "fabric:type": "silentgear:blueprint",
+      "gear_type": "silentgear:hammer",
+      "part_type": "silentgear:main"
+    },
+    {
+      "fabric:type": "silentgear:material",
+      "gear_type": "silentgear:hammer",
+      "part_type": "silentgear:main"
+    },
+    {
+      "fabric:type": "silentgear:material",
+      "gear_type": "silentgear:hammer",
+      "part_type": "silentgear:main"
+    },
+    {
+      "fabric:type": "silentgear:material",
+      "gear_type": "silentgear:hammer",
+      "part_type": "silentgear:main"
+    },
+    {
+      "fabric:type": "silentgear:material",
+      "gear_type": "silentgear:hammer",
+      "part_type": "silentgear:main"
+    },
+    {
+      "fabric:type": "silentgear:material",
+      "gear_type": "silentgear:hammer",
+      "part_type": "silentgear:main"
+    },
+    {
+      "fabric:type": "silentgear:material",
+      "gear_type": "silentgear:hammer",
+      "part_type": "silentgear:main"
+    },
+    {
+      "fabric:type": "silentgear:part_type",
+      "part_type": "silentgear:rod"
+    }
+  ],
+  "result": {
+    "id": "silentgear:hammer"
+  }
+}

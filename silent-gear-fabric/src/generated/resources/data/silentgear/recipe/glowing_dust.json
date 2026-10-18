@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:stick",
+    "#c:dusts/glowstone",
+    "#c:dusts/glowstone",
+    "#c:gems/quartz"
+  ],
+  "result": {
+    "count": 4,
+    "id": "silentgear:glowing_dust"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "#minecraft:planks",
+    "/": "#c:ingots/iron",
+    "b": "#c:gems/bort",
+    "d": "#c:gems/diamond",
+    "i": "#c:storage_blocks/iron"
+  },
+  "pattern": [
+    "/ /",
+    "dbd",
+    "#i#"
+  ],
+  "result": {
+    "id": "silentgear:refabricator"
+  }
+}

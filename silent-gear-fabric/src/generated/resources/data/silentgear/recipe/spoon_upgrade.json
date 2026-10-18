@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "silentgear:advanced_upgrade_base",
+    "minecraft:diamond_shovel"
+  ],
+  "result": {
+    "id": "silentgear:spoon_upgrade"
+  }
+}

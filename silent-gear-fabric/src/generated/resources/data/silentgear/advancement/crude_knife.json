@@ -1,0 +1,32 @@
+{
+  "parent": "silentgear:stone_anvil",
+  "criteria": {
+    "get_item": {
+      "conditions": {
+        "items": [
+          {
+            "items": "silentgear:crude_knife"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.silentgear.crude_knife.description"
+    },
+    "icon": {
+      "id": "silentgear:crude_knife"
+    },
+    "title": {
+      "translate": "advancements.silentgear.crude_knife.title"
+    }
+  },
+  "requirements": [
+    [
+      "get_item"
+    ]
+  ],
+  "sends_telemetry_event": true
+}
