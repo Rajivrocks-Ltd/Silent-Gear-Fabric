@@ -1,0 +1,5 @@
+// Root project. It only declares the Loom plugin version so both subprojects share it.
+// All real configuration lives in silent-lib-fabric/build.gradle and silent-gear-fabric/build.gradle.
+plugins {
+	id 'net.fabricmc.fabric-loom' version "${loom_version}" apply false
+}

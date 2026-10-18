@@ -1,0 +1,55 @@
+plugins {
+	id 'net.fabricmc.fabric-loom'
+}
+
+version = project.silentlib_version
+group = project.maven_group
+
+base {
+	archivesName = "silent-lib-${project.minecraft_version}-fabric"
+}
+
+loom {
+	// This subproject is a library. Launch the game from silent-gear-fabric instead,
+	// so do not generate IDE run configurations here.
+	runConfigs.configureEach {
+		ideConfigGenerated = false
+	}
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	// Used by util.ColorUtils. Upstream shades mixbox with the Shadow plugin.
+	// On Fabric we nest it as jar-in-jar instead.
+	implementation "com.scrtwpns:mixbox:${project.mixbox_version}"
+	include "com.scrtwpns:mixbox:${project.mixbox_version}"
+}
+
+processResources {
+	def version = project.version
+	inputs.property "version", version
+
+	filesMatching("fabric.mod.json") {
+		expand "version": version
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = 25
+	it.options.encoding = 'UTF-8'
+}
+
+java {
+	withSourcesJar()
+
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
+}
+
+jar {
+	from(rootProject.file("LICENSE")) {
+		rename { "${it}_silentlib" }
+	}
+}

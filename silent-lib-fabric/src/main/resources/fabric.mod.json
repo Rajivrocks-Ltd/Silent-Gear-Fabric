@@ -1,0 +1,33 @@
+{
+	"schemaVersion": 1,
+	"id": "silentlib",
+	"version": "${version}",
+	"name": "Silent Lib (Fabric)",
+	"description": "Shared library for SilentChaos512's mods. Unofficial Fabric port.",
+	"authors": [
+		"SilentChaos512"
+	],
+	"contributors": [
+		"Rajiv (Fabric port)"
+	],
+	"contact": {
+		"sources": "https://github.com/SilentChaos512/SilentLib",
+		"issues": "https://github.com/SilentChaos512/SilentLib/issues"
+	},
+	"license": "MIT",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"net.silentchaos512.lib.SilentLib"
+		],
+		"client": [
+			"net.silentchaos512.lib.SilentLibClient"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.19.5",
+		"minecraft": "~26.1.2",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}

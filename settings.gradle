@@ -1,0 +1,17 @@
+pluginManagement {
+	repositories {
+		maven {
+			name = 'Fabric'
+			url = 'https://maven.fabricmc.net/'
+		}
+		mavenCentral()
+		gradlePluginPortal()
+	}
+}
+
+rootProject.name = 'silent-gear-fabric-root'
+
+// Ported subset of Silent Lib (upstream has no Fabric version).
+include 'silent-lib-fabric'
+// The Silent Gear port itself.
+include 'silent-gear-fabric'

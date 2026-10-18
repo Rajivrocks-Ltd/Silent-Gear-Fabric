@@ -1,0 +1,39 @@
+{
+	"schemaVersion": 1,
+	"id": "silentgear",
+	"version": "${version}",
+	"name": "Silent Gear (Fabric)",
+	"description": "Modular and upgradeable tools, weapons, and armor. Allows full customization of materials and parts used in gear crafting, even user-defined ones! Unofficial Fabric port.",
+	"authors": [
+		"SilentChaos512"
+	],
+	"contributors": [
+		"Rajiv (Fabric port)"
+	],
+	"contact": {
+		"sources": "https://github.com/SilentChaos512/Silent-Gear",
+		"issues": "https://github.com/SilentChaos512/Silent-Gear/issues"
+	},
+	"license": "MIT",
+	"icon": "logo.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"net.silentchaos512.gear.SilentGear"
+		],
+		"client": [
+			"net.silentchaos512.gear.SilentGearClient"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.19.5",
+		"minecraft": "~26.1.2",
+		"java": ">=25",
+		"fabric-api": "*",
+		"forgeconfigapiport": "*",
+		"silentlib": ">=11.2.0"
+	},
+	"suggests": {
+		"trinkets": "*"
+	}
+}
