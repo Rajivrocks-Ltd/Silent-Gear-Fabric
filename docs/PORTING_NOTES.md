@@ -66,6 +66,43 @@ Every diff in this port is against these commits. They live in `reference/` (git
 - **Launch model:** milestone tests use `runClient`. The Modrinth App is used for the NeoForge reference
   instance and for the full M11 pass of the built jars. See TEST_CHECKLIST.md "How to launch".
 
+### 2026-10-18 (M2, Silent Lib subset)
+
+- Ported the 27 runtime classes listed in NEOFORGE_API_INVENTORY section 6. 17 are byte-for-byte
+  copies of upstream, 10 changed (`SilentLib`, `ClientTicks`, `ServerTicks`, `Greetings`,
+  `InitialSpawnItems`, `PlayerUtils`, `TeleportUtils`, `NameUtils`, `ExtendedShapelessRecipe`,
+  `DimensionFilterPlacement`), 2 new (`SilentLibClient`, `ShapelessIngredientMatcher`).
+  The 8 datagen-only classes wait for M10.
+- **Registered objects are plain vanilla fields, not holders.** `SilentLib.LOOT_CONTAINER` is a
+  `DataComponentType` and `DIMENSION_FILTER_PLACEMENT` a `PlacementModifierType`, registered with
+  `Registry.register` in static initializers. Fabric loads the entrypoint class during mod init, while
+  registries are still open. Reason: NeoForge lets `stack.get(holder)` take a holder, vanilla does not.
+  Silent Gear has 89 such call sites, so in M4 its data components should follow the same pattern.
+  Other registries (items, blocks, ...) are mostly used through `.get()` (about 360 sites), so for those
+  M4 will add a small `DeferredRegister` / `DeferredHolder` stand-in with the same method names.
+- **Event helpers register in `init()` methods** instead of their constructors. `ServerTicks`, `Greetings`
+  and `InitialSpawnItems` are initialized from `SilentLib.onInitialize()`, `ClientTicks` from
+  `SilentLibClient`. This keeps Fabric's client tick API from being touched on a dedicated server.
+- **`ClientTicks.partialTicks`**: NeoForge's `RenderFrameEvent` has no Fabric equivalent. The value is read
+  from vanilla's `DeltaTracker`, the same source NeoForge used. No mixin. Silent Gear only reads `ticksInGame`.
+- **Player persisted data** (`PlayerUtils.getPersistedDataSubcompound`, used for starter items) is a Fabric
+  data attachment `silentlib:persisted_data` (persistent, copied on death). It replaces NeoForge's
+  `getPersistentData()` + `PlayerPersisted` compound. Data saved by the NeoForge version is not migrated.
+- **Shapeless matching with custom ingredients** uses a new `ShapelessIngredientMatcher` (own code,
+  bipartite matching) instead of NeoForge's `RecipeMatcher`, which is LGPL. `Ingredient.isSimple()`
+  became `!Ingredient.requiresTesting()` (Fabric).
+- `TeleportUtils` gets the server from the entity's level instead of `ServerLifecycleHooks`.
+- `NameUtils.fromFluid(FluidStack)` now takes Fabric's `FluidVariant`. Silent Gear does not call it.
+- **jsr305 annotations** (`javax.annotation.Nullable` etc.) added as `compileOnly` to both subprojects.
+  NeoForge pulls them in transitively.
+- **Silent Lib access transformer not translated.** Its 3 entries widen fields on vanilla `ShapedRecipe` /
+  `ShapelessRecipe`, but neither Silent Lib recipe class extends those any more. Add a class tweaker only
+  if M7 needs it.
+- **`render_type` in block model JSON** is a NeoForge key. Vanilla 26.1 picks the chunk layer from texture
+  transparency (`ChunkSectionLayer.byTransparency`), so the key is redundant. Files left unchanged.
+  Check cutout blocks (crops, flowers) visually in M4.
+- `pack.mcmeta` not copied: Fabric generates mod resource pack metadata.
+
 ## Findings that change the plan
 
 - **Gear rendering is data-driven in 26.1.** Upstream has 303 item model definition files plus 3 custom

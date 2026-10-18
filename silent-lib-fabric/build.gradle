@@ -21,6 +21,10 @@ dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+	// javax.annotation (@Nullable, @ParametersAreNonnullByDefault). NeoForge provides these
+	// transitively, Fabric does not. Compile only: the JVM ignores missing annotation classes.
+	compileOnly "com.google.code.findbugs:jsr305:${project.jsr305_version}"
 	// Used by util.ColorUtils. Upstream shades mixbox with the Shadow plugin.
 	// On Fabric we nest it as jar-in-jar instead.
 	implementation "com.scrtwpns:mixbox:${project.mixbox_version}"

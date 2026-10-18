@@ -22,7 +22,8 @@ Abbreviation: `f.a` means `net.fabricmc.fabric.api`.
 | `FMLClientSetupEvent` | `onInitializeClient()` | |
 | `InterModEnqueueEvent`, `InterModProcessEvent` | drop (empty upstream) | |
 | `ServerStartedEvent`, `ServerStoppingEvent` | `f.a.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STARTED` / `SERVER_STOPPING` | |
-| `ServerLifecycleHooks.getCurrentServer()` | keep a server reference from `ServerLifecycleEvents` | Silent Lib `TeleportUtils` |
+| `ServerLifecycleHooks.getCurrentServer()` | `entity.level().getServer()` where an entity or level is at hand, otherwise keep a reference from `ServerLifecycleEvents` | done in Silent Lib `TeleportUtils` |
+| `Player.getPersistentData()` + `PERSISTED_NBT_TAG` | Fabric data attachment, persistent and `copyOnDeath()` | done: `SilentLib.PERSISTED_PLAYER_DATA` |
 
 ## Registration
 
@@ -55,7 +56,7 @@ Abbreviation: `f.a` means `net.fabricmc.fabric.api`.
 | `LevelTickEvent.Post` | `f.a.event.lifecycle.v1.ServerTickEvents.END_WORLD_TICK` | |
 | `ServerTickEvent` | `ServerTickEvents.START_SERVER_TICK` / `END_SERVER_TICK` | |
 | `ClientTickEvent` | `f.a.client.event.lifecycle.v1.ClientTickEvents` | |
-| `RenderFrameEvent` | mixin or `WorldRenderEvents` style hook, check in M2 | Silent Lib `ClientTicks` only uses it for partial ticks |
+| `RenderFrameEvent` | read `Minecraft.getInstance().getDeltaTracker()` directly | no Fabric event exists. Done in Silent Lib `ClientTicks` |
 | `FurnaceFuelBurnTimeEvent` | `f.a.registry.FuelValueEvents` | |
 | `GetEnchantmentLevelEvent` | mixin into `EnchantmentHelper` | `f.a.item.v1.EnchantmentEvents` does not cover level queries |
 | `AnvilUpdateEvent` | mixin into `AnvilMenu.createResult` | |
@@ -93,6 +94,9 @@ Abbreviation: `f.a` means `net.fabricmc.fabric.api`.
 |---|---|---|
 | `ICustomIngredient`, `IngredientType` | `f.a.recipe.v1.ingredient.CustomIngredient`, `CustomIngredientSerializer` | JSON key `"neoforge:ingredient_type"` becomes `"fabric:type"` |
 | `RecipesReceivedEvent` | `f.a.client.recipe.v1.sync.ClientRecipeSynchronizedEvent` | |
+| `Ingredient.isSimple()` | `!ingredient.requiresTesting()` (Fabric interface injection) | done in Silent Lib |
+| `RecipeMatcher.findMatches(items, ingredients)` | Silent Lib `ShapelessIngredientMatcher.matches` (own code) | NeoForge's class is LGPL, not copied |
+| `stack.get(holder)`, `stack.set(holder, value)` with a `DeferredHolder` | make the field a plain `DataComponentType` | vanilla methods only take the type itself |
 | Access transformer on `ShapedRecipe` / `ShapelessRecipe` | class tweaker in Silent Lib | |
 
 ## Inventories

@@ -32,6 +32,22 @@ Do not copy the `-sources.jar` files.
 - [x] No errors from silentgear or silentlib in the log
 - [ ] (added after the test) Mods button on the title screen lists "Silent Gear (Fabric)" and "Silent Lib (Fabric)"
 
+### M2 Silent Lib subset (passed 2026-10-18 with `runClient`)
+- [x] `runClient` reaches the title screen, no `NoClassDefFoundError` or `ClassNotFoundException` in the log
+- [x] Log shows `Silent Lib (Fabric) initialized` and `Silent Lib (Fabric) client initialized`
+- [x] Mods button lists both mods (Silent Lib shows a default icon, upstream has none either)
+- [x] Create a creative world (cheats on). No errors from silentlib when the world loads
+- [x] Type `/sl_tp` and press Tab: the command autocompletes (it is Silent Lib's teleport command)
+- [x] `/sl_tp @s minecraft:the_nether 0 80 0` moves you to the Nether, then
+      `/sl_tp @s minecraft:overworld 0 100 0` brings you back
+- [x] Save and quit: no errors in the log
+- Reopen check moved to M4, where starter items first write to the persisted player data
+
+### M4 registries and basic content (to be expanded when M4 is done)
+- [ ] New world: you receive the starter blueprint package once. Save, quit, reopen the world:
+      you do **not** receive it again (tests Silent Lib's persisted player data)
+- [ ] Cutout blocks (flax and fluffy crops, flowers, saplings) render with transparent pixels, not black
+
 ## Full pass (M11 and Phase 2)
 
 ### Boot and stability

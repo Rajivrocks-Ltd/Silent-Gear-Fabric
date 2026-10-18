@@ -1,15 +1,14 @@
 package net.silentchaos512.lib;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.silentchaos512.lib.event.ClientTicks;
 
 /**
  * Client-only entry point for Silent Lib on Fabric.
  *
  * <p>Fabric calls {@link #onInitializeClient()} after {@link SilentLib#onInitialize()},
  * and only on the physical client. Client setup that NeoForge did through mod bus events
- * goes here.
- *
- * <p>Milestone M0 skeleton: only logs a message.
+ * or client-side event listeners goes here.
  */
 public final class SilentLibClient implements ClientModInitializer {
     /**
@@ -17,6 +16,8 @@ public final class SilentLibClient implements ClientModInitializer {
      */
     @Override
     public void onInitializeClient() {
-        SilentLib.LOGGER.info("Silent Lib (Fabric) client init");
+        ClientTicks.init();
+
+        SilentLib.LOGGER.info("Silent Lib (Fabric) client initialized");
     }
 }
