@@ -116,7 +116,7 @@ Survival-like checks matter here: use a crafting table, not just the creative me
 - [x] Craft a part with the blueprint (for example a pickaxe head from iron): **the blueprint stays in the grid**
 - [x] Craft parts from several materials, and a part from mixed materials (e.g. iron + gold)
 - [x] Craft a full tool (pickaxe head + rod): the tool appears with the right materials in its tooltip
-- [ ] Put two damaged copies of the same Silent Gear tool in the grid: **no result** (vanilla's combine
+- [x] Put two damaged copies of the same Silent Gear tool in the grid: **no result** (vanilla's combine
       repair must not accept them; it would wipe the parts)
 - [ ] Craft at least one of each gear type: sword, katana, machete, knife, dagger, spear, trident, mace,
       shield, bow, crossbow, slingshot, arrow, pickaxe, shovel, axe, paxel, hammer, excavator, saw,
