@@ -1,0 +1,90 @@
+package net.silentchaos512.gear.compat.jei;
+
+import mezz.jei.api.constants.VanillaTypes;
+import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
+import mezz.jei.api.gui.drawable.IDrawable;
+import mezz.jei.api.gui.drawable.IDrawableAnimated;
+import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
+import mezz.jei.api.helpers.IGuiHelper;
+import mezz.jei.api.recipe.IFocusGroup;
+import mezz.jei.api.recipe.RecipeIngredientRole;
+import mezz.jei.api.recipe.category.IRecipeCategory;
+import mezz.jei.api.recipe.types.IRecipeType;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
+import net.silentchaos512.gear.block.salvager.SalvagerScreen;
+import net.silentchaos512.gear.crafting.recipe.salvage.SalvagingRecipe;
+import net.silentchaos512.gear.setup.SgBlocks;
+import net.silentchaos512.gear.util.IngredientUtils;
+import net.silentchaos512.gear.util.TextUtil;
+
+import java.util.Collections;
+import java.util.List;
+
+public class SalvagingRecipeCategoryJei implements IRecipeCategory<SalvagingRecipe> {
+    private static final int GUI_START_X = 9;
+    private static final int GUI_START_Y = 17;
+    private static final int GUI_WIDTH = 114 - GUI_START_X;
+    private static final int GUI_HEIGHT = 69 - GUI_START_Y;
+
+    private final IDrawable background;
+    private final IDrawable icon;
+    private final IDrawableAnimated arrow;
+    private final Component localizedName;
+
+    public SalvagingRecipeCategoryJei(IGuiHelper guiHelper) {
+        background = guiHelper.createDrawable(SalvagerScreen.TEXTURE, GUI_START_X, GUI_START_Y, GUI_WIDTH, GUI_HEIGHT);
+        icon = guiHelper.createDrawableIngredient(VanillaTypes.ITEM_STACK, new ItemStack(SgBlocks.SALVAGER));
+        arrow = guiHelper.drawableBuilder(SalvagerScreen.TEXTURE, 176, 14, 24, 17)
+                .buildAnimated(200, IDrawableAnimated.StartDirection.LEFT, false);
+        localizedName = TextUtil.translate("jei", "group.salvaging");
+    }
+
+    @Override
+    public int getWidth() {
+        return GUI_WIDTH;
+    }
+
+    @Override
+    public int getHeight() {
+        return GUI_HEIGHT;
+    }
+
+    @Override
+    public IRecipeType<SalvagingRecipe> getRecipeType() {
+        return SGearJeiPlugin.SALVAGING_TYPE;
+    }
+
+    @Override
+    public Component getTitle() {
+        return localizedName;
+    }
+
+    @Override
+    public IDrawable getIcon() {
+        return icon;
+    }
+
+    @Override
+    public void setRecipe(IRecipeLayoutBuilder builder, SalvagingRecipe recipe, IFocusGroup focuses) {
+        builder.addSlot(RecipeIngredientRole.INPUT, 9 - GUI_START_X, 35 - GUI_START_Y)
+                .addIngredients(VanillaTypes.ITEM_STACK, IngredientUtils.getItemList(recipe.getIngredient()));
+
+        List<ItemStackTemplate> results = recipe.getPossibleResultsForDisplay();
+
+        for (int i = 0; i < 9 && i < results.size(); ++i) {
+            int x = 18 * (i % 3) + 62 - GUI_START_X;
+            int y = 18 * (i / 3) + 17 - GUI_START_Y;
+            builder.addSlot(RecipeIngredientRole.OUTPUT, x, y)
+                    .addIngredients(VanillaTypes.ITEM_STACK, Collections.singletonList(results.get(i).create()));
+        }
+    }
+
+    @Override
+    public void draw(SalvagingRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphicsExtractor guiGraphics, double mouseX, double mouseY) {
+        background.draw(guiGraphics);
+        arrow.draw(guiGraphics, 32 - GUI_START_X, 34 - GUI_START_Y);
+    }
+}

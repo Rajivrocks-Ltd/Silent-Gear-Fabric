@@ -326,7 +326,7 @@ wideners "class tweakers".
 | Upstream | Files | Fabric plan |
 |---|---|---|
 | Curios (`compat/curios`) | `CuriosCompat`, `CurioGearItemCapability`, plus `isLoaded` checks in 4 places | Trinkets Updated, soft dependency |
-| JEI (`compat/jei`) | 6 classes | JEI Fabric 29.47.0.110 exists for 26.1.2, port in M8 |
+| JEI (`compat/jei`) | 6 classes | ported in M7 (JEI Fabric 29.47.0.111, `jei_mod_plugin` entrypoint) |
 | Caelus | only a mod id constant in `util.Const` | `GearElytraItem` uses vanilla glider component, verify in M8 |
 | sgearmetalworks | 2 `isLoaded` checks | keep check, swap to `FabricLoader` |
 

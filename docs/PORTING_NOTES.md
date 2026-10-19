@@ -217,17 +217,26 @@ Every diff in this port is against these commits. They live in `reference/` (git
   (it expects `neoforge:conditions`), so NeoForge logs a parse error for it. The Fabric port skips it cleanly.
 - Test data pack for M5/M6/M11: `test-packs/sg_port_test`. The dev server runs in `silent-gear-fabric/run-server`.
 
+### 2026-10-19 (M7, crafting, and JEI)
+
+- M7 crafting hooks wired (see "Wired in M7" below). First test run crashed at startup: `CraftingMenuMixin`
+  targeted `assemble(CraftingInput)`, but the compiled call is `assemble(RecipeInput)` (generic erasure). Mixin
+  targets are now checked against `javap` bytecode, not only the decompiled source.
+- **JEI moved forward from M8** at the user's request (finding recipes without it is slow). JEI Fabric
+  29.47.0.111 is a dev runtime mod (`localRuntime`), the plugin compiles against `jei-26.1.2-common-api` and
+  `jei-26.1.2-fabric-api` (`compileOnly`), and `fabric.mod.json` suggests `jei`. Players install JEI themselves.
+- Silent Gear's JEI plugin (`compat/jei`, 6 classes) is back in the build. It has no NeoForge code; it uses JEI's
+  cross-loader API. Changes: JEI Fabric finds plugins through the `jei_mod_plugin` entrypoint in `fabric.mod.json`
+  (the `@JeiPlugin` annotation stays, Fabric ignores it), and 3 uses of NeoForge's `new Ingredient(custom)`
+  became `toVanilla()`. It shows recipes from `ClientRecipeHelper` (recipe sync, M4).
+- `reference/minecraft-src` holds Minecraft sources decompiled with Loom `genSources`, for writing mixins.
+
 ### Hooks still to wire (stand-ins exist, nothing fires them yet)
 
 Gear behavior that depends on these does nothing yet. Each is listed on its stand-in's javadoc too.
 
 | Milestone | Hook | Needed for |
 |---|---|---|
-| M7 | `PlayerEvent.ItemCraftedEvent` (mixin in `ResultSlot`) | crafting advancements |
-| M7 | `IItemExtension.getCraftingRemainder(ItemInstance)` in crafting | blueprints, mod kit and blueprint book stay in the grid |
-| M7 | `IItemExtension.isCombineRepairable` in `RepairItemRecipe` | stops two gear items being combined (losing data) |
-| M7 | `CommonHooks.setCraftingPlayer` around crafting | recipes that read the crafting player |
-| M7 | `IBlockEntityExtension.onDataPacket` in client block entity updates | block entity progress shown in GUIs |
 | M8 | `IItemExtension.getMaxDamage / getDamage / setDamage / damageItem` (mixins in `ItemStack`) | gear durability |
 | M8 | `canPerformAction` for vanilla tool actions and sweep | strip, till, path, shear, sweep attack |
 | M8 | `makesPiglinsNeutral`, `canWalkOnPowderedSnow`, `getEquipmentSlot`, `getDefaultAttributeModifiers` | armor and curio items |
@@ -239,6 +248,12 @@ Gear behavior that depends on these does nothing yet. Each is listed on its stan
 Already fired on Fabric: `BreakBlockEvent`, `LivingDeathEvent`, `LivingDamageEvent.Post`,
 `PlayerLoggedInEvent`, `OnDatapackSyncEvent`, `LevelTickEvent`, `ItemTooltipEvent`, `InputEvent.Key` (in
 screens), attack clicks.
+
+Wired in M7: `PlayerEvent.ItemCraftedEvent` (`ResultSlotMixin`), stack-aware crafting remainder (Fabric API
+already calls `FabricItem.getCraftingRemainder(ItemStack)`; `ItemMixin` forwards it to
+`IItemExtension.getCraftingRemainder(ItemInstance)`), `isCombineRepairable` (`RepairItemRecipeMixin`),
+`CommonHooks` crafting player (`CraftingMenuMixin`, `ResultSlotMixin`), `onDataPacket`
+(`ClientPacketListenerMixin`).
 
 ## Findings that change the plan
 
@@ -272,12 +287,16 @@ All in Silent Lib (`silentlib.mixins.json`), added in M4.
 
 | Mixin | Target | What it does |
 |---|---|---|
-| `ItemMixin` | `Item` | Adds `IItemExtension`. Injects at the end of the constructor to keep the no-combine-repair flag. |
+| `ItemMixin` | `Item` | Adds `IItemExtension`. Injects at the end of the constructor to keep the no-combine-repair flag. Forwards Fabric's stack-aware crafting remainder (M7). |
 | `ItemPropertiesMixin` | `Item.Properties` | Adds `IItemPropertiesExtension.setNoCombineRepair()` and stores its flag. |
 | `BlockMixin` | `Block` | Adds `IBlockExtension`. No code. |
 | `BlockStateBaseMixin` | `BlockBehaviour.BlockStateBase` | Adds `IBlockStateExtension`. No code. |
 | `BlockEntityMixin` | `BlockEntity` | Adds `IBlockEntityExtension`. No code. |
 | `PlayerMixin` | `Player` | Adds `IPlayerExtension` (`openMenu` with extra data). No code. |
+| `RepairItemRecipeMixin` (M7) | `RepairItemRecipe.canCombine` | `@ModifyReturnValue`: also requires `isCombineRepairable` on both items. |
+| `CraftingMenuMixin` (M7) | `CraftingMenu.slotChangedCraftingGrid` | `@WrapOperation` on `assemble`: sets the crafting player for the call. |
+| `ResultSlotMixin` (M7) | `ResultSlot` | Posts `ItemCraftedEvent` after `onCraftedBy`; sets the crafting player around `getRemainingItems`. |
+| `client.ClientPacketListenerMixin` (M7, client) | `ClientPacketListener` handleBlockEntityData lambda | `@WrapOperation`: calls `onDataPacket` instead of `loadWithComponents`. |
 
 ## Known gaps
 

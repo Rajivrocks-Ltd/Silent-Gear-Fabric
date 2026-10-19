@@ -107,6 +107,31 @@ Gear behavior (durability, traits, tool actions) is not wired yet, see PORTING_N
 - [x] Copy the test pack into `run-server/world/datapacks/`, type `reload` in the server console: the client
       tooltip shows durability 999 without reconnecting
 
+### M7 gear crafting
+Do each step in the Fabric dev client and in the NeoForge reference instance, and note any difference.
+Survival-like checks matter here: use a crafting table, not just the creative menu. Gear *behavior*
+(durability loss, traits, tool actions) is M8, so only check crafting results and tooltips.
+- [x] `runClient` starts (new mixins load). (First run crashed on a wrong mixin target, fixed)
+- [x] Craft a blueprint (for example the pickaxe blueprint) from blueprint paper
+- [x] Craft a part with the blueprint (for example a pickaxe head from iron): **the blueprint stays in the grid**
+- [x] Craft parts from several materials, and a part from mixed materials (e.g. iron + gold)
+- [x] Craft a full tool (pickaxe head + rod): the tool appears with the right materials in its tooltip
+- [ ] Put two damaged copies of the same Silent Gear tool in the grid: **no result** (vanilla's combine
+      repair must not accept them; it would wipe the parts)
+- [ ] Craft at least one of each gear type: sword, katana, machete, knife, dagger, spear, trident, mace,
+      shield, bow, crossbow, slingshot, arrow, pickaxe, shovel, axe, paxel, hammer, excavator, saw,
+      prospector hammer, hoe, mattock, sickle, shears, fishing rod, helmet, chestplate, leggings, boots,
+      elytra, ring, bracelet, necklace. Compare stats in the tooltips (Left Ctrl) with the reference
+- [ ] Each station works and shows its progress arrow while working: Alloy Forge, Crude Mixer, Super Mixer,
+      Recrystallizer, Refabricator, Material Grader, Metal Press, Paint Mixer, Salvager, Starlight Charger,
+      Stone Anvil
+- [ ] A hopper above a station inserts items, a hopper below takes the output
+- [ ] Mod kit and blueprint book: put one in a recipe, it stays in the grid
+- [x] Crafting a gear item grants the related Silent Gear advancements (check the advancements screen)
+- [ ] JEI (dev runtime only): press R on an item to see recipes, U to see uses. Silent Gear adds its own
+      pages: gear crafting, Alloy Forge and mixers, Material Grader, Salvager, tool actions. Blueprint and
+      part recipes show in the crafting table page
+
 ## Full pass (M11 and Phase 2)
 
 ### Boot and stability

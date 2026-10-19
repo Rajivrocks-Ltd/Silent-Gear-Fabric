@@ -69,7 +69,8 @@ public interface IItemExtension {
      * Checks whether two damaged copies of this item may be combined into one in a crafting grid.
      * False for items made with {@link IItemPropertiesExtension#setNoCombineRepair()}.
      *
-     * <p>Hook: not called by vanilla yet (milestone M7). The mixin overrides this method.
+     * <p>Hook: called by vanilla's {@code RepairItemRecipe} (Silent Lib's {@code RepairItemRecipeMixin}). Silent
+     * Lib's {@code ItemMixin} overrides this method to return the stored flag.
      *
      * @param stack the stack
      * @return true if combining is allowed
@@ -140,7 +141,8 @@ public interface IItemExtension {
     /**
      * Gets what stays in the crafting grid after this item is used in a recipe.
      *
-     * <p>Hook: not called by vanilla yet (milestone M7).
+     * <p>Hook: Fabric API calls its stack-aware remainder from crafting, furnaces and brewing; Silent Lib's
+     * {@code ItemMixin} forwards that to this method.
      *
      * @param instance the item used
      * @return the remaining item, or null for none

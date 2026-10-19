@@ -18,7 +18,7 @@ public interface IBlockEntityExtension {
      * Called on the client when the server sends this block entity's update packet. The default
      * loads the data, as vanilla does.
      *
-     * <p>Hook: not called by vanilla yet; vanilla loads the data directly (milestone M7).
+     * <p>Hook: called from vanilla's client packet handler (Silent Lib's {@code ClientPacketListenerMixin}).
      *
      * @param net        the connection the packet came from
      * @param valueInput the data sent by the server

@@ -23,6 +23,9 @@
 		],
 		"client": [
 			"net.silentchaos512.gear.SilentGearClient"
+		],
+		"jei_mod_plugin": [
+			"net.silentchaos512.gear.compat.jei.SGearJeiPlugin"
 		]
 	},
 	"accessWidener": "silentgear.classtweaker",
@@ -35,6 +38,7 @@
 		"silentlib": ">=11.2.0"
 	},
 	"suggests": {
-		"trinkets": "*"
+		"trinkets": "*",
+		"jei": "*"
 	}
 }

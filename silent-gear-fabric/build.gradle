@@ -21,6 +21,11 @@ repositories {
 		url = 'https://maven.nucleoid.xyz/'
 	}
 	maven {
+		// JEI
+		name = 'BlameJared'
+		url = 'https://maven.blamejared.com/'
+	}
+	maven {
 		// Mod Menu
 		name = 'TerraformersMC'
 		url = 'https://maven.terraformersmc.com/'
@@ -90,6 +95,12 @@ dependencies {
 
 	// Dev only: adds the "Mods" button in runClient. Not a dependency of the released mod.
 	localRuntime "com.terraformersmc:modmenu:${project.modmenu_version}"
+
+	// JEI: Silent Gear's plugin (compat/jei) compiles against the API. The full mod only runs in dev;
+	// players install JEI themselves (it is optional).
+	compileOnly "mezz.jei:jei-${project.minecraft_version}-common-api:${project.jei_version}"
+	compileOnly "mezz.jei:jei-${project.minecraft_version}-fabric-api:${project.jei_version}"
+	localRuntime "mezz.jei:jei-${project.minecraft_version}-fabric:${project.jei_version}"
 
 	// Note: upstream also shades mixbox here, but no Silent Gear class uses it directly.
 	// Only Silent Lib's ColorUtils does, so mixbox ships inside the Silent Lib jar only.

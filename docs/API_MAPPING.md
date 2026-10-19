@@ -187,5 +187,5 @@ changes its import from the left column to the right column.
 | NeoForge | Fabric |
 |---|---|
 | Curios | Trinkets Updated `eu.pb4:trinkets:4.0.1+26.1` (soft dependency) |
-| JEI NeoForge | JEI Fabric `29.47.0.110` for 26.1.2 |
+| JEI NeoForge | JEI Fabric `29.47.0.111` for 26.1.2; plugin registered with the `jei_mod_plugin` entrypoint (done in M7) |
 | Caelus | vanilla glider component |

@@ -1,0 +1,97 @@
+package net.silentchaos512.gear.compat.jei;
+
+import mezz.jei.api.constants.VanillaTypes;
+import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
+import mezz.jei.api.gui.drawable.IDrawable;
+import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
+import mezz.jei.api.helpers.IGuiHelper;
+import mezz.jei.api.recipe.IFocusGroup;
+import mezz.jei.api.recipe.RecipeIngredientRole;
+import mezz.jei.api.recipe.category.IRecipeCategory;
+import mezz.jei.api.recipe.types.IRecipeType;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
+import net.silentchaos512.gear.api.material.Material;
+import net.silentchaos512.gear.block.grader.GraderScreen;
+import net.silentchaos512.gear.setup.SgBlocks;
+import net.silentchaos512.gear.setup.SgRegistries;
+import net.silentchaos512.gear.setup.SgTags;
+import net.silentchaos512.gear.util.IngredientUtils;
+import net.silentchaos512.gear.util.TextUtil;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class MaterialGraderRecipeCategory implements IRecipeCategory<MaterialGraderRecipeCategory.GraderRecipe> {
+    private static final int GUI_START_X = 24;
+    private static final int GUI_START_Y = 33;
+    private static final int GUI_WIDTH = 43 - GUI_START_X;
+    private static final int GUI_HEIGHT = 72 - GUI_START_Y;
+
+    private final IDrawable background;
+    private final IDrawable icon;
+    private final Component localizedName;
+
+    public MaterialGraderRecipeCategory(IGuiHelper guiHelper) {
+        background = guiHelper.createDrawable(GraderScreen.TEXTURE, GUI_START_X, GUI_START_Y, GUI_WIDTH, GUI_HEIGHT);
+        icon = guiHelper.createDrawableIngredient(VanillaTypes.ITEM_STACK, new ItemStack(SgBlocks.MATERIAL_GRADER));
+        localizedName = TextUtil.translate("jei", "group.grading");
+    }
+
+    @Override
+    public int getWidth() {
+        return GUI_WIDTH;
+    }
+
+    @Override
+    public int getHeight() {
+        return GUI_HEIGHT;
+    }
+
+    @Override
+    public IRecipeType<GraderRecipe> getRecipeType() {
+        return SGearJeiPlugin.GRADING_TYPE;
+    }
+
+    @Override
+    public Component getTitle() {
+        return localizedName;
+    }
+
+    @Override
+    public IDrawable getIcon() {
+        return icon;
+    }
+
+    @Override
+    public void setRecipe(IRecipeLayoutBuilder builder, GraderRecipe recipe, IFocusGroup focuses) {
+        builder.addSlot(RecipeIngredientRole.INPUT, 2, 2)
+                .addIngredients(VanillaTypes.ITEM_STACK, getMaterials());
+        builder.addSlot(RecipeIngredientRole.INPUT, 2, 22)
+                .addIngredients(VanillaTypes.ITEM_STACK, getCatalysts());
+    }
+
+    public static List<ItemStack> getMaterials() {
+        return SgRegistries.MATERIAL.getValues(true).stream()
+                .map(Material::getIngredient)
+                .flatMap(ing -> IngredientUtils.getValidItems(ing).stream())
+                .collect(Collectors.toList());
+    }
+
+    public static List<ItemStack> getCatalysts() {
+        return BuiltInRegistries.ITEM.stream()
+                .map(ItemStack::new)
+                .filter(stack -> stack.is(SgTags.Items.GRADER_CATALYSTS))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void draw(GraderRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphicsExtractor guiGraphics, double mouseX, double mouseY) {
+        background.draw(guiGraphics);
+    }
+
+    public static class GraderRecipe {
+    }
+}
