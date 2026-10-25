@@ -11,6 +11,7 @@
 - Fabric API source for 26.1.2 is in reference/fabric. Check real signatures there, do not rely on old tutorials (many Fabric API names changed in 26.1).
 - NeoForge 26.1.2.95 sources are in reference/neoforge-src, to see what a NeoForge hook really does.
 - The user codes in VS Code on Windows and tests with the Modrinth App plus `runClient`.
+- Since M10, `silent-gear-fabric/src/generated/resources` is written by `runDatagen` (the ported data generators). Change the generators, not those JSON files.
 
 ## Rules
 - Port loader-specific glue only. Do not change game logic, balance, or data formats.

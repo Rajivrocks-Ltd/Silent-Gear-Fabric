@@ -3,7 +3,7 @@ package net.silentchaos512.gear.api.data.material;
 import com.google.common.collect.Sets;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.CachedOutput;
-import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.resources.Identifier;
 import net.silentchaos512.gear.SilentGear;
@@ -21,12 +21,18 @@ import java.util.concurrent.CompletableFuture;
 
 public abstract class MaterialsProviderBase implements DataProvider {
     private final CompletableFuture<HolderLookup.Provider> lookupProvider;
-    protected final DataGenerator generator;
+    /**
+     * The pack to write into.
+     *
+     * <p>Port note: upstream keeps NeoForge's {@code DataGenerator} and reads its pack output; Fabric's data
+     * generator gives each provider its pack output directly.
+     */
+    protected final PackOutput output;
     protected final String modId;
 
-    public MaterialsProviderBase(CompletableFuture<HolderLookup.Provider> lookupProvider, DataGenerator generator, String modId) {
+    public MaterialsProviderBase(CompletableFuture<HolderLookup.Provider> lookupProvider, PackOutput output, String modId) {
         this.lookupProvider = lookupProvider;
-        this.generator = generator;
+        this.output = output;
         this.modId = modId;
     }
 
@@ -48,7 +54,7 @@ public abstract class MaterialsProviderBase implements DataProvider {
 
     @Override
     public CompletableFuture<?> run(CachedOutput cache) {
-        Path outputFolder = this.generator.getPackOutput().getOutputFolder();
+        Path outputFolder = this.output.getOutputFolder();
         Set<Identifier> set = Sets.newHashSet();
         List<CompletableFuture<?>> list = new ArrayList<>();
 
