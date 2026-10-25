@@ -421,6 +421,11 @@ Wired in M9: see the M9 decisions below.
   `fabric-26.1.2-4.2.1-port.1` predates the move to 4.2.3). The "sources" and "issues" links of both mods point to
   github.com/Rajivrocks-Ltd/Silent-Gear-Fabric, so port bugs are not reported upstream; SilentChaos512 stays the
   credited author.
+- **Publishing (2026-10-25):** same as upstream, a Maven publication (jar, sources, javadoc) to GitHub Packages,
+  run by hand with `publish`. Shared script `gradle/publishing.gradle`, applied by both subprojects; repository
+  `github_repo` in `gradle.properties`; credentials `gpr.username` / `gpr.token` from the publisher's own Gradle
+  properties. Artifact ids are the jar names (`silent-gear-26.1.2-fabric`, `silent-lib-26.1.2-fabric`); Silent
+  Gear's POM depends on `silent-lib-26.1.2-fabric` 11.2.0. Javadoc uses `failOnError = false` like upstream.
 - **Test notes:** a gear tool's mining rules hold block sets built from a separate registry lookup
   (`GearTool.Helper.REGISTRY_LOOKUP`, upstream code), so a tool never compares equal to itself after a save. The
   saved data is identical, so the save tests compare saved data. In 26.1 the crossbow loads during its use ticks,
