@@ -301,11 +301,7 @@ checked against the bytecode of the Loom merged jar.
 
 ### Hooks still to wire (stand-ins exist, nothing fires them yet)
 
-Gear behavior that depends on these does nothing yet. Each is listed on its stand-in's javadoc too.
-
-| Milestone | Hook | Needed for |
-|---|---|---|
-| M9 | `IItemExtension.shouldCauseReequipAnimation`, `IClientItemExtensions` hand transform and armor tint | rendering details |
+None left after M9. Each stand-in's javadoc names the hook that calls it.
 
 Already fired on Fabric: `BreakBlockEvent`, `LivingDeathEvent`, `LivingDamageEvent.Post`,
 `PlayerLoggedInEvent`, `OnDatapackSyncEvent`, `LevelTickEvent`, `ItemTooltipEvent`, `InputEvent.Key` (in
@@ -318,6 +314,43 @@ already calls `FabricItem.getCraftingRemainder(ItemStack)`; `ItemMixin` forwards
 (`ClientPacketListenerMixin`).
 
 Wired in M8: see the M8 decisions above. All events that Silent Gear listens to are now posted.
+
+Wired in M9: see the M9 decisions below.
+
+### 2026-10-25 (M9, client rendering)
+
+- **Most of M9 was already done.** Gear item models are data-driven (vanilla model types plus the three tint
+  sources registered in M4), the broken look is chosen in code through the item model component, and entity,
+  block entity, screen, key and config screen registrations were ported in M4 and M7. Upstream registers no
+  custom tooltip components, GUI layers or standalone models (its trident standalone model is a `FIXME`).
+- **Worn armor and elytra tint** (`client.EquipmentLayerRendererMixin`). NeoForge asks
+  `IClientItemExtensions.getArmorLayerTintColor(stack, layer, index, dyeColor)` for each equipment layer.
+  Silent Gear returns the material color for layer 0 and no tint for the others, also on layers that the
+  equipment asset does not mark dyeable (crimson steel armor, the elytra wings use vanilla's elytra asset).
+  Vanilla would leave those untinted. The stand-in's default now returns vanilla's `getColorForLayer`, as
+  NeoForge's does; `silentlib.classtweaker` makes that private method accessible.
+- **First-person hand pose** (`client.ItemInHandRendererMixin`). NeoForge asks `applyForgeHandTransform`
+  before vanilla's use, spin attack and swing transforms in `renderArmWithItem` and skips them when it returns
+  true. Silent Gear's trident uses it for its charge animation. A mixin cannot jump like NeoForge's patch, so
+  it injects at the start of that branch and, when the item handles the pose, renders the item, pops the pose
+  and returns, which is what vanilla does next.
+- **Re-equip animation: Fabric API, no mixin.** `FabricItem.allowComponentsUpdateAnimation` is called from
+  `ItemInHandRenderer.tick` when a hand's stack changed but is the same item; `ItemMixin` forwards it to
+  `shouldCauseReequipAnimation(old, new, false)`. NeoForge also asks on item and slot changes, but Silent Gear's
+  override only compares item and components, so the result is the same. Vanilla 26.1 already skips the
+  animation when only ignored components such as damage change, on both loaders.
+- **Trident model unchanged.** Upstream's 3D held trident renderer (`GearTridentSpecialRenderer`) is never
+  registered upstream, so the port keeps the M7 "Port fix" layered model. Adding the 3D model would be new
+  behavior, not porting.
+- **Client log, last run:** only the known upstream warnings (block model texture slots, `phantom_light`), the
+  shield item model has no `particle` texture (same file as upstream), and JEI reports 16 duplicate items in the
+  main creative tab (the tab code matches upstream). The NeoForge reference log (2026-10-25) shows the same
+  block, `phantom_light` and shield warnings, plus `Missing textures in model silentgear:item/trident`, the
+  upstream bug the M7 trident Port fix repaired. The JEI line was in a cut-off part of the reference log.
+- **M9 test (2026-10-25):** game starts with the new client mixins, trident animation and throw work, mining
+  does not bob, a diamond armor set looks right. The tester has low vision, so detailed visual comparisons with
+  the reference (material colors, broken models, armor and elytra tint) are left for player reports after
+  release; tooltips, screens and keys looked fine but not every case was checked.
 
 ### Automated gametests (2026-10-25, user approved)
 
@@ -368,7 +401,7 @@ marked otherwise. Targets were checked with `javap` (generic erasure changes som
 
 | Mixin | Target | What it does |
 |---|---|---|
-| `ItemMixin` | `Item` | Adds `IItemExtension`. Injects at the end of the constructor to keep the no-combine-repair flag. Forwards Fabric's stack-aware crafting remainder (M7). |
+| `ItemMixin` | `Item` | Adds `IItemExtension`. Injects at the end of the constructor to keep the no-combine-repair flag. Forwards Fabric's stack-aware crafting remainder (M7) and `allowComponentsUpdateAnimation` (M9). |
 | `ItemPropertiesMixin` | `Item.Properties` | Adds `IItemPropertiesExtension.setNoCombineRepair()` and stores its flag. |
 | `BlockMixin` | `Block` | Adds `IBlockExtension`. No code. |
 | `BlockStateBaseMixin` | `BlockBehaviour.BlockStateBase` | Adds `IBlockStateExtension`. No code. |
@@ -378,6 +411,8 @@ marked otherwise. Targets were checked with `javap` (generic erasure changes som
 | `CraftingMenuMixin` (M7) | `CraftingMenu.slotChangedCraftingGrid` | `@WrapOperation` on `assemble`: sets the crafting player for the call. |
 | `ResultSlotMixin` (M7) | `ResultSlot` | Posts `ItemCraftedEvent` after `onCraftedBy`; sets the crafting player around `getRemainingItems`. |
 | `client.ClientPacketListenerMixin` (M7, client) | `ClientPacketListener` handleBlockEntityData lambda | `@WrapOperation`: calls `onDataPacket` instead of `loadWithComponents`. |
+| `client.EquipmentLayerRendererMixin` (M9, client) | `EquipmentLayerRenderer.renderLayers` (11 args) | `@WrapOperation` on `getColorForLayer`: asks `IClientItemExtensions.getArmorLayerTintColor` with the layer index. |
+| `client.ItemInHandRendererMixin` (M9, client) | `ItemInHandRenderer.renderArmWithItem` | `@Inject` at the second `isUsingItem` call: `applyForgeHandTransform`, then renders and returns if it applied. |
 | `ItemStackMixin` (M8) | `ItemStack` | `getMaxDamage`, `setDamageValue`, `hurtAndBreak` call the item's durability hooks. |
 | `LivingEntityMixin` (M8) | `LivingEntity` | Posts `LivingIncomingDamageEvent` (`hurtServer`), `LivingDamageEvent.Pre` (`actuallyHurt`), `LivingFallEvent` (`causeFallDamage`), `LivingExperienceDropEvent` (`dropExperience`). |
 | `PlayerMixin` (M8 additions) | `Player` | Posts `PlayerTickEvent.Pre/Post` and `LivingDamageEvent.Pre` (players have their own `actuallyHurt`). |

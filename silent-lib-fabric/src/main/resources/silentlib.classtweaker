@@ -7,3 +7,5 @@ transitive-inject-interface	net/minecraft/world/level/block/state/BlockBehaviour
 transitive-inject-interface	net/minecraft/world/level/block/entity/BlockEntity	net/silentchaos512/lib/port/IBlockEntityExtension
 transitive-inject-interface	net/minecraft/world/item/Item$Properties	net/silentchaos512/lib/port/IItemPropertiesExtension
 transitive-inject-interface	net/minecraft/world/entity/player/Player	net/silentchaos512/lib/port/menu/IPlayerExtension
+# Client: lets IClientItemExtensions.getArmorLayerTintColor default to vanilla's layer color, as NeoForge does.
+accessible	method	net/minecraft/client/renderer/entity/layers/EquipmentLayerRenderer	getColorForLayer	(Lnet/minecraft/client/resources/model/EquipmentClientInfo$Layer;I)I

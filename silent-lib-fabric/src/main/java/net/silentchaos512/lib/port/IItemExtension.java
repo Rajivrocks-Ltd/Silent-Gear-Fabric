@@ -121,7 +121,9 @@ public interface IItemExtension {
     /**
      * Checks whether the item in hand should play the re-equip animation when its stack changes.
      *
-     * <p>Hook: not called by vanilla yet (milestone M9).
+     * <p>Hook: called from {@code ItemInHandRenderer.tick} through Fabric API's
+     * {@code FabricItem.allowComponentsUpdateAnimation}, which Silent Lib's {@code ItemMixin} forwards here. Fabric
+     * only asks when the old and new stacks are the same item, and always passes {@code slotChanged = false}.
      *
      * @param oldStack     the previous stack
      * @param newStack     the new stack

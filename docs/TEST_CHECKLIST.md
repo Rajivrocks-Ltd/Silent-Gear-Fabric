@@ -215,6 +215,34 @@ with the NeoForge reference when something looks off.
       Hover or click each to see the slots inside
 - [x] Tooltip (auto): a ring does not say "Requires Trinkets to equip"
 
+### M9 client rendering (passed 2026-10-25, visual checks limited, see note)
+Fabric dev client, compared with the NeoForge reference instance. Two new client mixins: a wrong target
+crashes at startup, so check the first item first.
+**Note (2026-10-25):** the tester has low vision, so fine visual comparisons with the reference (material
+colors, broken models, armor tint details) were only checked roughly. These are left for player reports after
+release, and for the M11 full pass if someone else can help.
+- [x] `runClient` starts and a world loads
+- [~] (deferred to player reports) Gear made from different materials looks different (try iron, gold, diamond, wood and crimson steel
+      pickaxes and swords): in the inventory, in hand (first and third person, F5), dropped on the ground, in an
+      item frame. Compare with the reference
+- [~] (deferred to player reports) A broken gear tool looks broken (its model changes), and goes back to normal after repair
+- [~] (partly: a diamond set looks right worn, in hand and dropped; the rest deferred to player reports)
+      Worn armor is colored by its material: iron, gold, diamond and leather sets, and a **crimson steel** set
+      (crimson steel uses a layer that is not dyeable, so only the new tint hook colors it). Compare with the
+      reference, front and back (F5)
+- [~] (deferred to player reports) A gear elytra's wings are colored by its material, in the chest slot and in the Trinkets Back slot
+- [x] Gear trident: hold right-click, the arm raises and the trident is pulled back as the charge builds (this
+      is upstream's own animation, not vanilla's); release to throw; the thrown trident renders in flight
+- [x] Mining with a gear pickaxe: the hand does not drop and rise again after every block
+- [~] (looked fine, not checked closely) Switching between two different gear tools in the hotbar plays the normal swap animation
+- [~] (looked fine, not every case checked) Tooltips: normal, with Left Ctrl, with Left Shift, and with F3+H (advanced). Compare with the reference
+- [~] (looked fine, not every screen checked) Every Silent Gear screen opens and draws correctly (Alloy Forge, mixers, Recrystallizer, Refabricator,
+      Material Grader, Metal Press, Paint Mixer, Salvager, Starlight Charger, Gear Smithing Table, blueprint
+      book, Material Book), and Mods > Silent Gear > Config opens the config screen
+- [~] (looked fine, not every key checked) Silent Gear key bindings show in Controls (Cycle Back, Cycle Next, Display Properties and Traits,
+      Display Trait Descriptions, Display Construction and Materials, Open Item) and work: hold each display
+      key over a gear item and the tooltip changes
+
 ## Full pass (M11 and Phase 2)
 
 ### Boot and stability
