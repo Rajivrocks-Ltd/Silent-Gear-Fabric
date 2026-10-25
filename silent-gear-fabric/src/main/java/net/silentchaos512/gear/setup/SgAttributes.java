@@ -24,8 +24,8 @@ public class SgAttributes {
      * How fast entities swim, as a multiplier (1.0 is normal speed). Used by the Swift Swim trait.
      *
      * <p>Port note: upstream uses NeoForge's own {@code neoforge:swim_speed} attribute, which Fabric does not
-     * have. This attribute has the same base value, range and syncing. Until milestone M8 adds the hook
-     * that applies it while swimming, it has no effect.
+     * have. This attribute has the same base value, range and syncing. Silent Gear's {@code AttributeMapMixin}
+     * gives it to every living entity and {@code LivingEntitySwimMixin} applies it while swimming.
      */
     public static final DeferredHolder<Attribute, Attribute> SWIM_SPEED = ATTRIBUTES.register(
             "swim_speed",

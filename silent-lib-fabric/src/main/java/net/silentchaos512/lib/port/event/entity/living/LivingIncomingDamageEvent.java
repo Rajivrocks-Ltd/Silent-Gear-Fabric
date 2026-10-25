@@ -7,7 +7,8 @@ import net.minecraft.world.entity.LivingEntity;
  * Fired on the server when an entity is about to be hurt, before armor and other reductions.
  * Listeners can change the amount. Canceling it prevents the damage.
  *
- * <p>Fabric: not fired yet. Needs a mixin at the start of {@code LivingEntity.hurtServer} (milestone M8).
+ * <p>Fabric: posted by {@code LivingEntityMixin} in {@code LivingEntity.hurtServer}, after the invulnerability
+ * checks.
  */
 public class LivingIncomingDamageEvent extends LivingEvent {
     private final DamageSource source;

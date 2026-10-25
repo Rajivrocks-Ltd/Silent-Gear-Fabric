@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.silentchaos512.lib.port.CommonHooks;
 import net.silentchaos512.lib.port.event.entity.living.LivingDamageEvent;
 import net.silentchaos512.lib.port.event.entity.living.LivingDeathEvent;
 import net.silentchaos512.lib.port.event.entity.player.PlayerEvent;
@@ -43,6 +44,9 @@ public final class FabricEventBridge {
 
         ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register((player, joined) ->
                 NeoForge.EVENT_BUS.post(new OnDatapackSyncEvent(player.level().getServer().getPlayerList(), player)));
+
+        ServerLifecycleEvents.SERVER_STARTING.register(CommonHooks::setCurrentServer);
+        ServerLifecycleEvents.SERVER_STOPPED.register(server -> CommonHooks.setCurrentServer(null));
 
         ServerTickEvents.START_LEVEL_TICK.register(level ->
                 NeoForge.EVENT_BUS.post(new LevelTickEvent.Pre(level)));

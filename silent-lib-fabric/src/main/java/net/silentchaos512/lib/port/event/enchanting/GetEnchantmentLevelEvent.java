@@ -15,8 +15,8 @@ import java.util.Optional;
  * Fired when the game looks up enchantment levels on an item. Listeners can add or change levels
  * in {@link #getEnchantments()}; the change only affects this lookup, not the item.
  *
- * <p>Fabric: not fired yet. Needs a mixin in the {@code EnchantmentHelper} level lookups
- * (milestone M8).
+ * <p>Fabric: posted by {@code EnchantmentHelperMixin} and {@code EnchantmentsPredicateMixin}, from the same
+ * places NeoForge posts it.
  */
 public class GetEnchantmentLevelEvent extends Event {
     private final ItemInstance stack;

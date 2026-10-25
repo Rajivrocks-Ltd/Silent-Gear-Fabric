@@ -12,6 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.level.Level;
 import net.fabricmc.loader.api.FabricLoader;
+import net.silentchaos512.gear.compat.trinkets.TrinketsCompat;
 import net.silentchaos512.gear.SilentGear;
 import net.silentchaos512.gear.api.item.GearItem;
 import net.silentchaos512.gear.api.property.TraitListPropertyValue;
@@ -178,11 +179,9 @@ public final class TraitHelper {
     }
 
     public static int getHighestLevelCurio(LivingEntity entity, DataResource<Trait> trait) {
-        if (FabricLoader.getInstance().isModLoaded(Const.CURIOS)) {
-            // Port note: Curios does not exist on Fabric, so this branch never runs. Trinkets support
-            // replaces it in milestone M8.
-            // return CuriosCompat.getHighestTraitLevel(entity, trait);
-            return 0;
+        // Port note: upstream checks Curios here; Trinkets replaces Curios on Fabric.
+        if (FabricLoader.getInstance().isModLoaded(Const.TRINKETS)) {
+            return TrinketsCompat.getHighestTraitLevel(entity, trait);
         }
         return 0;
     }

@@ -18,5 +18,5 @@
 - Keep package names and class names from upstream where possible so diffs against upstream stay readable.
 - Prefer Fabric API over mixins. When a mixin is needed, keep it minimal and list it in PORTING_NOTES.md.
 - Dependencies use `implementation` (non-remapping Loom for 26.x).
-- Finish every task with `.\gradlew.bat build` passing (JAVA_HOME must point to JDK 25). Do not run the game; the user tests by hand.
+- Finish every task with `.\gradlew.bat build` passing (JAVA_HOME must point to JDK 25). Do not run the game interactively (`runClient`); the user tests by hand. Automated gametests (headless Gradle tasks) are allowed (user approved 2026-10-25).
 - At the end of each task, write a short summary: files changed, mixins added, anything not ported, and what the user should test.

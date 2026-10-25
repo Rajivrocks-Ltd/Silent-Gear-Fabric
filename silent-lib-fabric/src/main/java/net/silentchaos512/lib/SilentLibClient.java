@@ -1,7 +1,9 @@
 package net.silentchaos512.lib;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.minecraft.client.Minecraft;
 import net.silentchaos512.lib.event.ClientTicks;
+import net.silentchaos512.lib.port.CommonHooks;
 import net.silentchaos512.lib.port.event.FabricClientEventBridge;
 
 /**
@@ -19,6 +21,10 @@ public final class SilentLibClient implements ClientModInitializer {
     public void onInitializeClient() {
         FabricClientEventBridge.init();
         ClientTicks.init();
+        CommonHooks.setClientRegistryAccess(() -> {
+            var level = Minecraft.getInstance().level;
+            return level != null ? level.registryAccess() : null;
+        });
 
         SilentLib.LOGGER.info("Silent Lib (Fabric) client initialized");
     }

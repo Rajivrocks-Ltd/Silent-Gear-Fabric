@@ -16,7 +16,8 @@ import java.util.List;
  * Fired when a broken block is about to drop its items and experience. Listeners can change the
  * drop list and the experience. Canceling it drops nothing.
  *
- * <p>Fabric: not fired yet. Needs a mixin around block drops (milestone M8).
+ * <p>Fabric: posted by {@code BlockDropsMixin} (see {@code BlockDropsHook}) when a block broken by an entity drops
+ * its items.
  */
 public class BlockDropsEvent extends CancellableEvent {
     private final ServerLevel level;

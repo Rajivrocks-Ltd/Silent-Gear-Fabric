@@ -133,7 +133,9 @@ public class GearArmorItem extends BasicGearItem implements GearArmor {
 
     @Override
     public boolean canWalkOnPowderedSnow(ItemStack stack, LivingEntity wearer) {
-        return this.getEquipmentSlot(stack) == EquipmentSlot.FEET && TraitHelper.hasTrait(stack, Const.Traits.SNOW_WALKER);
+        // Port fix: upstream asks getEquipmentSlot(stack), which returns null for armor (the slot is in the
+        // EQUIPPABLE component in 26.1), so Snow Walker never worked. The armor type knows the slot.
+        return this.armorType.getSlot() == EquipmentSlot.FEET && TraitHelper.hasTrait(stack, Const.Traits.SNOW_WALKER);
     }
 
     //endregion

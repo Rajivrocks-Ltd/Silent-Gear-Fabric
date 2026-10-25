@@ -29,7 +29,8 @@ public abstract class PlayerEvent extends LivingEvent {
      * Fired when the game computes how fast a player breaks a block. Listeners can change the
      * speed. Canceling it means the player cannot break the block.
      *
-     * <p>Fabric: not fired yet. Needs a mixin in {@code Player.getDestroySpeed} (milestone M8).
+     * <p>Fabric: posted by {@code BlockBehaviourMixin} around the {@code Player.getDestroySpeed} call in
+     * {@code BlockBehaviour.getDestroyProgress}.
      */
     public static class BreakSpeed extends PlayerEvent {
         private final BlockState state;
@@ -69,8 +70,7 @@ public abstract class PlayerEvent extends LivingEvent {
     /**
      * Fired when a player takes a crafted item out of a result slot.
      *
-     * <p>Fabric: not fired yet. Needs a mixin in {@code ResultSlot.checkTakeAchievements}
-     * (milestone M7).
+     * <p>Fabric: posted by {@code ResultSlotMixin} in {@code ResultSlot.checkTakeAchievements}.
      */
     public static class ItemCraftedEvent extends PlayerEvent {
         private final ItemStack crafting;

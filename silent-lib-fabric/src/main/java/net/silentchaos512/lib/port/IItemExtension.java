@@ -5,11 +5,21 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.AxeItem;
+import net.minecraft.world.item.BrushItem;
+import net.minecraft.world.item.FireChargeItem;
+import net.minecraft.world.item.FishingRodItem;
+import net.minecraft.world.item.FlintAndSteelItem;
+import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ShearsItem;
+import net.minecraft.world.item.ShovelItem;
+import net.minecraft.world.item.SpyglassItem;
+import net.minecraft.world.item.TridentItem;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import org.jspecify.annotations.Nullable;
 
@@ -34,7 +44,7 @@ public interface IItemExtension {
     /**
      * Gets the current damage of a stack of this item.
      *
-     * <p>Hook: not called by vanilla yet (milestone M8).
+     * <p>Hook: not wired. No Silent Gear item overrides it, and the default reads the same component as vanilla.
      *
      * @param stack the stack
      * @return the damage, between 0 and the max damage
@@ -46,7 +56,7 @@ public interface IItemExtension {
     /**
      * Gets the maximum damage of a stack of this item.
      *
-     * <p>Hook: not called by vanilla yet (milestone M8).
+     * <p>Hook: called by vanilla's {@code ItemStack.getMaxDamage} (Silent Lib's {@code ItemStackMixin}).
      *
      * @param stack the stack
      * @return the max damage, 0 if the item cannot be damaged
@@ -82,7 +92,7 @@ public interface IItemExtension {
     /**
      * Sets the damage of a stack of this item.
      *
-     * <p>Hook: not called by vanilla yet (milestone M8).
+     * <p>Hook: called by vanilla's {@code ItemStack.setDamageValue} (Silent Lib's {@code ItemStackMixin}).
      *
      * @param stack  the stack
      * @param damage the new damage
@@ -95,7 +105,7 @@ public interface IItemExtension {
      * Called before a stack of this item takes damage. The return value is the damage actually
      * applied.
      *
-     * <p>Hook: not called by vanilla yet (milestone M8).
+     * <p>Hook: called by vanilla's {@code ItemStack.hurtAndBreak} (Silent Lib's {@code ItemStackMixin}).
      *
      * @param stack    the stack
      * @param amount   the damage about to be applied
@@ -125,13 +135,34 @@ public interface IItemExtension {
     /**
      * Checks whether this item can perform the given tool action.
      *
-     * <p>Hook: called by Silent Gear's own code; vanilla equivalents are wired in milestone M8.
+     * <p>Hook: Silent Lib mixins call it where NeoForge's patches do and vanilla checks for one exact item:
+     * shears on mobs, leashes, equipment, beehives, pumpkins and tripwire, and fishing rods in
+     * {@code FishingHook}. See {@code ShearableMobsMixin}, {@code EntityShearsMixin} and the other
+     * mixins that use {@code ItemAbilityChecks}.
+     *
+     * <p>Port note: NeoForge overrides this in {@code AxeItem}, {@code HoeItem}, {@code ShovelItem},
+     * {@code ShearsItem}, {@code FishingRodItem}, {@code TridentItem}, {@code BrushItem},
+     * {@code FlintAndSteelItem}, {@code FireChargeItem} and {@code SpyglassItem}, each returning its
+     * {@code ItemAbilities.DEFAULT_*_ACTIONS} set. Those overrides are reproduced here with {@code instanceof}
+     * checks, so subclasses that call {@code super} (like Silent Gear's axe and shears) get the same answer.
      *
      * @param stack       the item
      * @param itemAbility the action
      * @return true if the item can do it
      */
     default boolean canPerformAction(ItemInstance stack, ItemAbility itemAbility) {
+        Object item = this;
+        if (item instanceof AxeItem) return ItemAbilities.DEFAULT_AXE_ACTIONS.contains(itemAbility);
+        if (item instanceof HoeItem) return ItemAbilities.DEFAULT_HOE_ACTIONS.contains(itemAbility);
+        if (item instanceof ShovelItem) return ItemAbilities.DEFAULT_SHOVEL_ACTIONS.contains(itemAbility);
+        if (item instanceof ShearsItem) return ItemAbilities.DEFAULT_SHEARS_ACTIONS.contains(itemAbility);
+        if (item instanceof FishingRodItem) return ItemAbilities.DEFAULT_FISHING_ROD_ACTIONS.contains(itemAbility);
+        if (item instanceof TridentItem) return ItemAbilities.DEFAULT_TRIDENT_ACTIONS.contains(itemAbility);
+        if (item instanceof BrushItem) return ItemAbilities.DEFAULT_BRUSH_ACTIONS.contains(itemAbility);
+        if (item instanceof FlintAndSteelItem) return ItemAbilities.DEFAULT_FLINT_ACTIONS.contains(itemAbility);
+        if (item instanceof FireChargeItem) return ItemAbilities.DEFAULT_FIRECHARGE_ACTIONS.contains(itemAbility);
+        if (item instanceof SpyglassItem) return ItemAbilities.DEFAULT_SPYGLASS_ACTIONS.contains(itemAbility);
+
         if (itemAbility == ItemAbilities.SWORD_SWEEP) {
             return stack.is(ItemTags.SWORDS);
         }
@@ -154,7 +185,7 @@ public interface IItemExtension {
     /**
      * Checks whether wearing this item keeps piglins neutral.
      *
-     * <p>Hook: not called by vanilla yet (milestone M8).
+     * <p>Hook: called by vanilla's {@code PiglinAi.isWearingSafeArmor} (Silent Lib's {@code PiglinAiMixin}).
      *
      * @param stack  the worn stack
      * @param wearer the wearer
@@ -167,7 +198,8 @@ public interface IItemExtension {
     /**
      * Checks whether wearing this item lets the wearer walk on powder snow.
      *
-     * <p>Hook: not called by vanilla yet (milestone M8).
+     * <p>Hook: called by vanilla's {@code PowderSnowBlock.canEntityWalkOnPowderSnow} (Silent Lib's
+     * {@code PowderSnowBlockMixin}).
      *
      * @param stack  the worn stack
      * @param wearer the wearer
@@ -180,7 +212,8 @@ public interface IItemExtension {
     /**
      * Gets the equipment slot this item goes into, or null to let vanilla decide.
      *
-     * <p>Hook: not called by vanilla yet (milestone M8).
+     * <p>Hook: not wired. NeoForge reads it when equipping; in 26.1 the {@code EQUIPPABLE} component decides the
+     * slot, and Silent Gear sets that component on its elytra and armor.
      *
      * @param stack the stack
      * @return the slot, or null
@@ -192,7 +225,7 @@ public interface IItemExtension {
     /**
      * Gets attribute modifiers that apply on top of the stack's attribute modifier component.
      *
-     * <p>Hook: not called by vanilla yet (milestone M8).
+     * <p>Hook: not wired. Only Silent Gear's curio item overrides it, and it returns the default.
      *
      * @param stack the stack
      * @return the modifiers, empty by default
