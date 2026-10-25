@@ -52,7 +52,8 @@ public class GearCurioItem extends BasicGearItem {
     @SuppressWarnings("deprecation")
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltipAdder, TooltipFlag flag) {
-        if (!FabricLoader.getInstance().isModLoaded(Const.CURIOS)) {
+        // Port note: upstream checks for Curios; Trinkets replaces Curios on Fabric.
+        if (!FabricLoader.getInstance().isModLoaded(Const.TRINKETS)) {
             tooltipAdder.accept(TextUtil.misc("curiosNotInstalled").withStyle(ChatFormatting.RED));
         }
     }

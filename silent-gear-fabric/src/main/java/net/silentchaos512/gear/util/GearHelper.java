@@ -351,7 +351,10 @@ public final class GearHelper {
                 // Gear does not break permanently, so adjust damage amount. This prevents damage value from dropping
                 // below 1 (the broken state)
                 clampedValue = Math.min(stack.getMaxDamage() - stack.getDamageValue() - 1, postTraitValue);
-                if (!isBroken(stack) && stack.getDamageValue() + preTraitValue >= stack.getMaxDamage() - 1) {
+                // Port fix: upstream tested preTraitValue here. When a trait (Malleable, Flexible) then cancelled
+                // the damage, the break sound played but the tool did not break, so it broke (and played the
+                // sound) again on the next use. Use the damage that is really applied.
+                if (!isBroken(stack) && stack.getDamageValue() + postTraitValue >= stack.getMaxDamage() - 1) {
                     onBroken.accept(stack.getItem());
                     // Ensure item is not destroyed by third-party onBroken handlers
                     stack.setCount(1);

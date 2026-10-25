@@ -889,7 +889,8 @@
   "misc.silentgear.broken": "You broke it!",
   "misc.silentgear.caelusNotInstalled": "Requires Caelus API to use in back slot",
   "misc.silentgear.crude": "Crude",
-  "misc.silentgear.curiosNotInstalled": "Requires Curios API to equip",
+  "misc.silentgear.curiosNotInstalled": "Requires Trinkets to equip",
+  "trinkets.slot.hand.bracelet": "Bracelet",
   "misc.silentgear.exampleOutput1": "Example output (modular recipe)",
   "misc.silentgear.exampleOutput2": "If you crafted this, something went wrong!",
   "misc.silentgear.graderCatalyst": "Grader Catalyst (Tier %d)",
@@ -1199,5 +1200,6 @@
   "trait.silentgear.wind_blast.desc": "Creates a blast of wind when attacking",
   "trait.silentgear.yummy": "Yummy",
   "trait.silentgear.yummy.desc": "Makes the item edible, but...",
-  "attribute.name.silentgear.swim_speed": "Swim Speed"
+  "attribute.name.silentgear.swim_speed": "Swim Speed",
+  "magic_armor": "Magic Armor"
 }

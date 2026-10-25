@@ -1,0 +1,24 @@
+{
+	"schemaVersion": 1,
+	"id": "silentgear-gametest",
+	"version": "1.0.0",
+	"name": "Silent Gear Gametests",
+	"description": "Automated gametests for the Silent Gear Fabric port. Development only, never shipped.",
+	"license": "MIT",
+	"environment": "*",
+	"entrypoints": {
+		"fabric-gametest": [
+			"net.silentchaos512.gear.gametest.SmokeTests",
+			"net.silentchaos512.gear.gametest.DurabilityTests",
+			"net.silentchaos512.gear.gametest.TraitTests",
+			"net.silentchaos512.gear.gametest.MobDropTests",
+			"net.silentchaos512.gear.gametest.ToolActionTests",
+			"net.silentchaos512.gear.gametest.ArmorTests",
+			"net.silentchaos512.gear.gametest.TrinketsTests"
+		]
+	},
+	"depends": {
+		"silentgear": "*",
+		"fabric-gametest-api-v1": "*"
+	}
+}

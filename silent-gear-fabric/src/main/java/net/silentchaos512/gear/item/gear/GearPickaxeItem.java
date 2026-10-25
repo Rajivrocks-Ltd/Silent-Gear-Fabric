@@ -4,8 +4,10 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.silentchaos512.gear.api.item.GearDiggerTool;
 import net.silentchaos512.gear.api.item.GearType;
 import net.silentchaos512.gear.core.component.GearPropertiesData;
@@ -35,6 +37,25 @@ public class GearPickaxeItem extends BasicGearItem implements GearDiggerTool {
             return SgTags.Blocks.MINEABLE_WITH_PICKAXE_WITH_SPOON;
         }
         return BlockTags.MINEABLE_WITH_PICKAXE;
+    }
+
+    /**
+     * Gets the mining speed. A working pickaxe uses vanilla's tool component, as upstream does.
+     *
+     * <p>Port fix (user approved 2026-10-25): upstream's broken pickaxe keeps its tool component and mines at full
+     * speed, unlike the broken axe and shovel. A broken pickaxe (and the hammer, paxel and prospector hammer,
+     * which extend it) now gets the same slow broken speed from {@link GearHelper#getDestroySpeed}.
+     *
+     * @param stack the pickaxe
+     * @param state the block being mined
+     * @return the mining speed
+     */
+    @Override
+    public float getDestroySpeed(ItemStack stack, BlockState state) {
+        if (GearHelper.isBroken(stack)) {
+            return GearHelper.getDestroySpeed(stack, state);
+        }
+        return super.getDestroySpeed(stack, state);
     }
 
     @Override

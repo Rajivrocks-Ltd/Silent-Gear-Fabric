@@ -6,8 +6,7 @@ import net.minecraft.world.entity.LivingEntity;
  * Fired when an entity lands after a fall. Listeners can change the distance and damage
  * multiplier. Canceling it means no fall damage.
  *
- * <p>Fabric: not fired yet. Needs a mixin at the start of {@code LivingEntity.causeFallDamage}
- * (milestone M8).
+ * <p>Fabric: posted by {@code LivingEntityMixin} at the start of {@code LivingEntity.causeFallDamage}.
  */
 public class LivingFallEvent extends LivingEvent {
     private double distance;

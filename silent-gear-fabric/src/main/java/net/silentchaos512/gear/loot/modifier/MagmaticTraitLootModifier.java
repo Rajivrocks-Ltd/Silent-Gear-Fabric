@@ -1,34 +1,22 @@
 package net.silentchaos512.gear.loot.modifier;
 
-import com.google.common.base.Suppliers;
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.neoforged.neoforge.common.loot.IGlobalLootModifier;
-import net.neoforged.neoforge.common.loot.LootModifier;
 
-import java.util.function.Supplier;
 
 /**
  * Controls the smelting ability of the Magmatic trait. Pretty much a direct copy of the smelting
  * enchantment example provided by Forge.
  */
-public class MagmaticTraitLootModifier extends LootModifier {
-    public static final Supplier<MapCodec<MagmaticTraitLootModifier>> CODEC = Suppliers.memoize(() ->
-            RecordCodecBuilder.mapCodec(inst ->
-                    codecStart(inst).apply(inst, MagmaticTraitLootModifier::new)));
+public class MagmaticTraitLootModifier {
+    // Port note: upstream extends NeoForge's LootModifier and is registered as a global loot modifier with a
+    // codec. Fabric has no such registry; SgLootModifiers registers doApply with Silent Lib's GlobalLootModifiers and
+    // checks the conditions that the upstream JSON file declared.
 
-    public MagmaticTraitLootModifier(LootItemCondition[] conditionsIn, int priority) {
-        super(conditionsIn, priority);
-    }
-
-    @Override
-    protected ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> generatedLoot, LootContext context) {
+    public ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> generatedLoot, LootContext context) {
         ObjectArrayList<ItemStack> ret = new ObjectArrayList<>();
         generatedLoot.forEach(s -> ret.add(smelt(s, context)));
         return ret;
@@ -42,8 +30,4 @@ public class MagmaticTraitLootModifier extends LootModifier {
                 .orElse(stack);
     }
 
-    @Override
-    public MapCodec<? extends IGlobalLootModifier> codec() {
-        return CODEC.get();
-    }
 }

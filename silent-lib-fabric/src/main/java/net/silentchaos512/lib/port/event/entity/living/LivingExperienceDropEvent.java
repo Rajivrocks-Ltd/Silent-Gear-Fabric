@@ -7,7 +7,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * Fired when a dying entity is about to drop experience. Listeners can change the amount.
  *
- * <p>Fabric: not fired yet. Needs a mixin in {@code LivingEntity.dropExperience} (milestone M8).
+ * <p>Fabric: posted by {@code LivingEntityMixin} in {@code LivingEntity.dropExperience}.
  */
 public class LivingExperienceDropEvent extends LivingEvent {
     private final @Nullable Player attackingPlayer;

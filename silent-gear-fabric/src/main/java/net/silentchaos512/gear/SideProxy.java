@@ -21,6 +21,7 @@ import net.silentchaos512.gear.gear.part.PartSerializers;
 import net.silentchaos512.gear.gear.trait.effect.EnchantmentTraitEffect;
 import net.silentchaos512.gear.gear.trait.effect.OxidationTraitEffect;
 import net.silentchaos512.gear.gear.util.MagnetPullTracker;
+import net.silentchaos512.gear.loot.modifier.SgLootModifiers;
 import net.silentchaos512.gear.network.SgNetwork;
 import net.silentchaos512.gear.setup.*;
 import net.silentchaos512.gear.setup.gear.*;
@@ -80,6 +81,7 @@ class SideProxy implements IProxy {
         EnchantmentTraitEffect.EventHandler.register();
         OxidationTraitEffect.EventHandler.register();
         SgLoot.register();
+        SgLootModifiers.register();
         SgBiomeModifiers.register();
         SgBlocks.registerStrippables();
     }

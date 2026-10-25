@@ -8,6 +8,8 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
+import net.silentchaos512.gear.compat.trinkets.TrinketsCompat;
+import net.silentchaos512.gear.util.Const;
 import net.neoforged.fml.config.ModConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -59,8 +61,11 @@ public final class SilentGear implements ModInitializer {
                 ? new SideProxy.Client()
                 : new SideProxy.Server();
 
-        // Port note: upstream registers Curios event handlers here when Curios is loaded.
-        // Curios does not exist on Fabric; the Trinkets integration replaces it in milestone M8.
+        // Port note: upstream registers its Curios capabilities here when Curios is loaded. Trinkets
+        // replaces Curios on Fabric; the items are registered by now (SideProxy), so the callbacks can be set.
+        if (FabricLoader.getInstance().isModLoaded(Const.TRINKETS)) {
+            TrinketsCompat.init();
+        }
 
         LOGGER.info("Silent Gear (Fabric) initialized");
     }

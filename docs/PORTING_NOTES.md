@@ -231,18 +231,80 @@ Every diff in this port is against these commits. They live in `reference/` (git
   became `toVanilla()`. It shows recipes from `ClientRecipeHelper` (recipe sync, M4).
 - `reference/minecraft-src` holds Minecraft sources decompiled with Loom `genSources`, for writing mixins.
 
+### 2026-10-19 (M8, gameplay hooks)
+
+Every hook was placed where NeoForge's own patch puts it. To find those places, the patched Minecraft jar
+from the Modrinth NeoForge install (`meta/libraries/net/neoforged/minecraft-client-patched/26.1.2.112`) was
+disassembled with `javap`; the NeoForge sources jar does not contain the patches. Every mixin target was
+checked against the bytecode of the Loom merged jar.
+
+- **Durability** (`ItemStackMixin`): `getMaxDamage`, `setDamageValue` and `hurtAndBreak` call the item's
+  `getMaxDamage`, `setDamage` and `damageItem`. `getDamage` and `isDamaged` are not wired: no Silent Gear
+  item overrides them and the defaults read the same component as vanilla.
+- **Living and player events** (`LivingEntityMixin`, `PlayerMixin`, `BlockBehaviourMixin`): incoming damage,
+  damage before health drops, fall, experience drop, player tick, break speed.
+- **Block drops** (`BlockDropsMixin`, `BlockDropsHook`): the 6-argument `Block.dropResources` (a breaker
+  and a tool) collects the drops and experience, posts `BlockDropsEvent`, then spawns what is left. Drops
+  from explosions and pistons stay vanilla, as in NeoForge.
+- **Global loot modifiers.** Fabric has no loot modifier registry. Silent Lib adds a small one
+  (`port.loot.GlobalLootModifiers`), applied by `LootTableMixin` at the same point as NeoForge: once per table
+  rolled on its own, after stacks are split, never for tables rolled from inside another table. Fabric's
+  `LootTableEvents.MODIFY_DROPS` was tried first and dropped: it also fires for inner tables, which would give
+  bonus drops a second roll on the added mob drop tables. Silent Gear registers `bonus_drops_trait` and
+  `magmatic_smelting` there (`SgLootModifiers`); the 5 `add_mob_drops` files became extra pools added with
+  `LootTableEvents.MODIFY`. NeoForge orders modifiers by priority only, and all of these have the default.
+- **Fuel** (`FuelValuesMixin`): `burnDuration` posts `FurnaceFuelBurnTimeEvent` with vanilla's value;
+  `isFuel` also accepts stacks the event gives a burn time to.
+- **Enchantment levels** (`EnchantmentHelperMixin`, `EnchantmentsPredicateMixin`): same five places NeoForge
+  posts `GetEnchantmentLevelEvent`. `CommonHooks.resolveLookup` finds the enchantment registry like NeoForge's
+  (running server first, then the client level); the server is tracked by `FabricEventBridge`.
+- **Anvil** (`AnvilMenuMixin`): `AnvilUpdateEvent` after `createResult`, on every path.
+- **Item abilities.** `IItemExtension.canPerformAction` now gives the same answers as NeoForge's overrides in
+  `AxeItem`, `ShearsItem` and the other vanilla tools (by `instanceof`), so gear items that call `super` get
+  them too. Vanilla checks for exactly `Items.SHEARS` or `Items.FISHING_ROD` in places where NeoForge asks
+  `canPerformAction`; those are mixins now: shearing mobs (`ShearableMobsMixin`, see below), leashes and
+  equipment (`EntityShearsMixin`, `LeashFenceKnotEntityMixin`), honeycomb, pumpkins, tripwire, and the fishing
+  hook (without it, a gear fishing rod's hook is removed right after casting). Strip, till and path need no
+  mixin: gear axes and shovels call the netherite tool's `useOn` after their own broken check. Sweep needs
+  none either: gear swords, katanas and machetes are in `minecraft:swords`, which is what vanilla checks.
+- **Mob shearing.** NeoForge removes the shears branch from sheep, mooshrooms, snow golems, bogged and copper
+  golems and shears them from `ShearsItem.interactLivingEntity`. Here the vanilla branch stays and checks
+  `canPerformAction(shears_harvest)`, so the result is the same for vanilla and gear shears.
+- **Piglins and powder snow** (`PiglinAiMixin`, `PowderSnowBlockMixin`): call `makesPiglinsNeutral` and
+  `canWalkOnPowderedSnow`. `getEquipmentSlot` and `getDefaultAttributeModifiers` are not wired: in 26.1 the
+  `EQUIPPABLE` component picks the slot, and the only override of the second one returns the default.
+- **Deferred holders in saved data** (`RegistryMixin`). Silent Gear armor puts `SgAttributes.MAGIC_ARMOR` (a
+  `DeferredHolder`) into its attribute modifiers. Vanilla's registry codec only accepts a `Holder.Reference`, so
+  saving, hashing or syncing that stack failed with "Unregistered holder" and crashed the game (found in M7
+  testing: taking lined armor out of the crafting grid). NeoForge patches `safeCastToReference` to call
+  `getDelegate()` first; the mixin does the same. The network stream codec reads `holder.value()` and needed no
+  change.
+- **Trinkets replaces Curios** (`compat/trinkets`). Same slots as upstream's Curios data: ring in
+  `hand/ring`, necklace in `chest/necklace`, elytra in `chest/back`, and a new `hand/bracelet` slot (Trinkets
+  has no bracelet slot; it uses the glove icon). Trinkets gives no slots to players by default, so
+  `data/trinkets/entities/silentgear.json` assigns them, like upstream's Curios entities file. Callbacks
+  (`GearTrinketCallback`) do what upstream's `GearCurio` did: tick, trait attribute modifiers (ids get the
+  slot as a suffix, as Trinkets does), keep on death, equip from use, gold equip sound. The elytra gets no
+  tick: Trinkets already lets glider items fly from a trinket slot and damages them, so upstream's damage
+  tick would double it. The Brilliant trait on a trinket makes piglins neutral through Silent Gear's own
+  `PiglinAiMixin`, because Trinkets only checks the `piglin_safe_armor` tag. The "requires Curios" tooltip now
+  checks for Trinkets, and the en_us text says "Requires Trinkets to equip" (other languages still say Curios).
+  Upstream's `data/curios` and `data/silentgear/curios` files stay in the jar; they do nothing on Fabric.
+- **Swim speed** (`AttributeMapMixin`, `LivingEntitySwimMixin`, in Silent Gear): vanilla builds the default
+  attribute sets during bootstrap, before mods register attributes, so `silentgear:swim_speed` cannot be added
+  to `createLivingAttributes` like NeoForge's. Instead an entity's attribute map creates it the first time it
+  is asked for it (equipment modifiers, loading, syncing). It is applied at NeoForge's two points: water
+  movement speed and the upward push when jumping in water.
+- **Elytra** needs nothing: the gear elytra sets vanilla's `GLIDER` component, and flight damage goes through
+  the durability hook.
+- Silent Gear has its own `silentgear.mixins.json` now (upstream ships an empty one).
+
 ### Hooks still to wire (stand-ins exist, nothing fires them yet)
 
 Gear behavior that depends on these does nothing yet. Each is listed on its stand-in's javadoc too.
 
 | Milestone | Hook | Needed for |
 |---|---|---|
-| M8 | `IItemExtension.getMaxDamage / getDamage / setDamage / damageItem` (mixins in `ItemStack`) | gear durability |
-| M8 | `canPerformAction` for vanilla tool actions and sweep | strip, till, path, shear, sweep attack |
-| M8 | `makesPiglinsNeutral`, `canWalkOnPowderedSnow`, `getEquipmentSlot`, `getDefaultAttributeModifiers` | armor and curio items |
-| M8 | `LivingIncomingDamageEvent`, `LivingDamageEvent.Pre`, `LivingFallEvent`, `LivingExperienceDropEvent`, `PlayerTickEvent`, `PlayerEvent.BreakSpeed`, `BlockDropsEvent`, `FurnaceFuelBurnTimeEvent`, `GetEnchantmentLevelEvent`, `AnvilUpdateEvent` | traits, magic armor, anvil repair, flammable gear as fuel |
-| M8 | `silentgear:swim_speed`: add to living entity attributes, apply while swimming | Swift Swim trait |
-| M8 | global loot modifiers, mob drop tables, Trinkets | see open questions |
 | M9 | `IItemExtension.shouldCauseReequipAnimation`, `IClientItemExtensions` hand transform and armor tint | rendering details |
 
 Already fired on Fabric: `BreakBlockEvent`, `LivingDeathEvent`, `LivingDamageEvent.Post`,
@@ -254,6 +316,23 @@ already calls `FabricItem.getCraftingRemainder(ItemStack)`; `ItemMixin` forwards
 `IItemExtension.getCraftingRemainder(ItemInstance)`), `isCombineRepairable` (`RepairItemRecipeMixin`),
 `CommonHooks` crafting player (`CraftingMenuMixin`, `ResultSlotMixin`), `onDataPacket`
 (`ClientPacketListenerMixin`).
+
+Wired in M8: see the M8 decisions above. All events that Silent Gear listens to are now posted.
+
+### Automated gametests (2026-10-25, user approved)
+
+- `silent-gear-fabric/src/gametest` is a dev-only test mod (`silentgear-gametest`) for Fabric's gametest API.
+  It is its own source set, so it is not in the release jar. `build.gradle` adds a `gametest` run; run it with
+  `.\gradlew.bat :silent-gear-fabric:runGametest`. It is not hooked into `build` (Loom's
+  `fabricApi.configureTests` would add it to `check`), so a failing test never blocks a normal build.
+- The tests cover the M8 checklist through the real hooks: mining, anvil, loot tables, fall damage, item use on
+  blocks and mobs, Trinkets slots. Report: `build/gametest/junit.xml`.
+- `TestPlayer` is a fake survival `ServerPlayer`. Two vanilla details made a plain fake player useless:
+  changing to the game mode a player already has does nothing, so the gametest server's creative abilities
+  stayed (fixed by setting the abilities directly), and a `ServerPlayer` ignores all damage until its client
+  sends `ServerboundPlayerLoadedPacket` (the test sends it).
+- Tests must allow for random traits: iron (Malleable) and the wood rod (Flexible) sometimes skip durability
+  loss, so the durability tests mine several blocks. Stone gives Ancient 2, not 1, on a three-material head.
 
 ## Findings that change the plan
 
@@ -272,18 +351,20 @@ already calls `FabricItem.getCraftingRemainder(ItemStack)`; `ItemMixin` forwards
 
 - **`neoforge:swim_speed` attribute: decided 2026-10-18** (user chose option a). Silent Gear registers its own
   `silentgear:swim_speed` (`SgAttributes.SWIM_SPEED`, base 1.0, range 0 to 1024, synced, like NeoForge's),
-  `swift_swim.json` points at it, and en_us.json has its name "Swim Speed". It has no effect until M8 adds it
-  to living entities and applies it while swimming. Found because the trait failed to load and crashed world
-  creation (upstream treats a bad trait file as fatal).
-- **`neoforge:needs_netherite_tool` block tag.** Kept under the same id through the `Tags` shim. Check in M8
-  whether vanilla 26.1 tool tiers already cover this.
-- **Curios slot data** in `data/silentgear/curios` needs a Trinkets equivalent in M8.
+  `swift_swim.json` points at it, and en_us.json has its name "Swim Speed". Applied while swimming since M8.
+  Found because the trait failed to load and crashed world creation (upstream treats a bad trait file as fatal).
+- **`neoforge:needs_netherite_tool` block tag: closed in M8.** Silent Gear only reads it (harvest tier 4 for
+  ore block items and AOE tools). NeoForge ships it empty, and on Fabric a tag nobody defines is empty too,
+  so the result is the same unless another mod fills it.
+- **Curios slot data: closed in M8.** Replaced by `data/trinkets` slot, entity and tag files (see M8).
 - **Silent Lib distribution.** Ship as a separate jar (like upstream) or nest it in the Silent Gear jar.
   Default: separate jar, decide at release.
 
 ## Mixins added
 
-All in Silent Lib (`silentlib.mixins.json`), added in M4.
+Silent Lib (`silentlib.mixins.json`) unless marked Silent Gear (`silentgear.mixins.json`). Added in M4 unless
+marked otherwise. Targets were checked with `javap` (generic erasure changes some descriptors, for example
+`ItemStack.is(Item)` compiles to `is(Object)`).
 
 | Mixin | Target | What it does |
 |---|---|---|
@@ -297,6 +378,29 @@ All in Silent Lib (`silentlib.mixins.json`), added in M4.
 | `CraftingMenuMixin` (M7) | `CraftingMenu.slotChangedCraftingGrid` | `@WrapOperation` on `assemble`: sets the crafting player for the call. |
 | `ResultSlotMixin` (M7) | `ResultSlot` | Posts `ItemCraftedEvent` after `onCraftedBy`; sets the crafting player around `getRemainingItems`. |
 | `client.ClientPacketListenerMixin` (M7, client) | `ClientPacketListener` handleBlockEntityData lambda | `@WrapOperation`: calls `onDataPacket` instead of `loadWithComponents`. |
+| `ItemStackMixin` (M8) | `ItemStack` | `getMaxDamage`, `setDamageValue`, `hurtAndBreak` call the item's durability hooks. |
+| `LivingEntityMixin` (M8) | `LivingEntity` | Posts `LivingIncomingDamageEvent` (`hurtServer`), `LivingDamageEvent.Pre` (`actuallyHurt`), `LivingFallEvent` (`causeFallDamage`), `LivingExperienceDropEvent` (`dropExperience`). |
+| `PlayerMixin` (M8 additions) | `Player` | Posts `PlayerTickEvent.Pre/Post` and `LivingDamageEvent.Pre` (players have their own `actuallyHurt`). |
+| `BlockBehaviourMixin` (M8) | `BlockBehaviour.getDestroyProgress` | `@WrapOperation` on `Player.getDestroySpeed`: posts `PlayerEvent.BreakSpeed` with the block position. |
+| `BlockDropsMixin` (M8) | `Block.dropResources` (6 args), `Block.popExperience` | Sends drops through `BlockDropsHook`, which posts `BlockDropsEvent`. |
+| `LootTableMixin` (M8) | `LootTable.getRandomItems` (3 `Consumer` variants) | Applies `GlobalLootModifiers` once per table rolled on its own. |
+| `FuelValuesMixin` (M8) | `FuelValues.burnDuration`, `isFuel` | Posts `FurnaceFuelBurnTimeEvent`; accepts stacks the event makes fuel. |
+| `EnchantmentHelperMixin` (M8) | `EnchantmentHelper` | Posts `GetEnchantmentLevelEvent` in `getItemEnchantmentLevel`, both `runIterationOnItem`, `hasTag`. |
+| `EnchantmentsPredicateMixin` (M8) | `EnchantmentsPredicate.Enchantments` | Adds NeoForge's `matches(DataComponentGetter)` override, so loot table enchantment checks see the event. |
+| `AnvilMenuMixin` (M8) | `AnvilMenu.createResult` | Posts `AnvilUpdateEvent` at every return and applies its result. |
+| `ShearableMobsMixin` (M8) | `mobInteract` of `Sheep`, `MushroomCow`, `SnowGolem`, `Bogged`, `CopperGolem` | `is(Items.SHEARS)` becomes `canPerformAction(shears_harvest)`. |
+| `EntityShearsMixin` (M8) | `Entity.interact` | Shears checks become `shears_harvest` (leashes) and `shears_remove_armor` (equipment). |
+| `LeashFenceKnotEntityMixin` (M8) | `LeashFenceKnotEntity.interact` | Shears check becomes `shears_harvest`. |
+| `BeehiveBlockMixin` (M8) | `BeehiveBlock.useItemOn` | Shears check becomes `shears_harvest`. |
+| `PumpkinBlockMixin` (M8) | `PumpkinBlock.useItemOn` | Shears check becomes `shears_carve`. |
+| `TripWireBlockMixin` (M8) | `TripWireBlock.playerWillDestroy` | Shears check becomes `shears_disarm`. |
+| `FishingHookMixin` (M8) | `FishingHook.shouldStopFishing` | Fishing rod check becomes `fishing_rod_cast`. |
+| `PiglinAiMixin` (M8) | `PiglinAi.isWearingSafeArmor` | Tag check becomes `makesPiglinsNeutral`. |
+| `PowderSnowBlockMixin` (M8) | `PowderSnowBlock.canEntityWalkOnPowderSnow` | Leather boots check becomes `canWalkOnPowderedSnow`. |
+| `RegistryMixin` (M8) | `Registry.safeCastToReference` | Unwraps a `DeferredHolder` to its registry holder before the `Holder.Reference` check, as NeoForge does. |
+| Silent Gear `PiglinAiMixin` (M8) | `PiglinAi.isWearingSafeArmor` | Also true for a gear trinket with Brilliant (Trinkets only). |
+| Silent Gear `AttributeMapMixin` (M8) | `AttributeMap.getInstance` | Creates `silentgear:swim_speed` for any living entity on first use. |
+| Silent Gear `LivingEntitySwimMixin` (M8) | `LivingEntity.travelInWater`, `jumpInLiquid` | Multiplies water speed and the swim-up push by swim speed. |
 
 ## Known gaps
 
@@ -315,9 +419,32 @@ Marked `Port fix:` in the code. These bugs are in upstream itself, so they also 
   tools, using the existing `textures/item/trident/` layers (rod, main, highlight) in the tint order of
   `items/trident.json`. It shows as a flat icon in hand; upstream's intended 3D held model needs the
   special renderer (milestone M9). `trident_throwing.json` is unused in 26.x and left as is.
+- **Snow Walker did nothing** (approved 2026-10-25). `GearArmorItem.canWalkOnPowderedSnow` checked
+  `getEquipmentSlot(stack) == FEET`, but that returns null for armor on NeoForge too (26.1 keeps the slot in the
+  `EQUIPPABLE` component), so gear boots always sank in powder snow. It now checks `armorType.getSlot()`.
+  Gametest `snowWalkerBootsWalkOnPowderSnow` is required again.
+- **A broken pickaxe mined at full speed** (approved 2026-10-25). Broken gear axes, shovels, maces and machetes
+  slow to 0.25 through `GearHelper.getDestroySpeed`, but the pickaxe used vanilla's tool component, which
+  `GearTool.onRecalculatePost` leaves in place when the tool breaks (measured: broken iron pickaxe 6.0, same as
+  working). `GearPickaxeItem.getDestroySpeed` now returns the broken speed when broken and is unchanged
+  otherwise. This also covers the hammer, paxel and prospector hammer, which extend the pickaxe. Sickles, hoes
+  and mattocks were not changed. Gametest `brokenPickaxeMinesSlowly`.
+- **The break sound played twice** (found while testing the pickaxe fix, 2026-10-25). `GearHelper.damageItem`
+  decided "this use breaks the tool" from the damage *before* traits. When Malleable or Flexible then cancelled
+  that point, the break sound played but the tool stayed whole, so the next block still mined at full speed and
+  the sound played again when it really broke. It now uses the damage after traits. Gametest
+  `breakCallbackRunsOnceWhenReallyBroken`.
+- **Magic armor showed as "magic_armor" in tooltips** (approved 2026-10-25). `SgAttributes.MAGIC_ARMOR` uses
+  the bare string `magic_armor` as its translation key, and no upstream lang file defines it. en_us.json now
+  has `"magic_armor": "Magic Armor"`. Lang data only, no code change; other languages still show the raw key.
 
 ## Upstream issues (same on NeoForge, not changed by the port)
 
+- **Attribute traits are added twice.** `GearItem.buildAttributes` adds every trait's attribute modifiers, and
+  `GearData.setGearAttributeModifiers` then loops over the traits again, so the attribute modifier component
+  holds each trait modifier twice (same id). In play only one applies, because vanilla replaces a modifier with
+  the same id; the tooltip shows the line twice (for example "-60% Gravity" on Moonwalker boots). Found
+  2026-10-25. Not changed; NeoForge's own tooltip code may or may not hide the duplicate.
 - **Block model warnings** for `alloy_forge`, `salvager`, `gear_smithing_table`, `refabricator`,
   `material_grader` (unused parent texture slots) and `phantom_light` (no blockstate file, it is invisible).
 

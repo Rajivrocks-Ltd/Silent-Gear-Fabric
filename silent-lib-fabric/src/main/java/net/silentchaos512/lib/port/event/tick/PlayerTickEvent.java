@@ -6,8 +6,7 @@ import net.silentchaos512.lib.port.event.Event;
 /**
  * Fired every tick for every player, on both sides.
  *
- * <p>Fabric: not fired yet. Needs a mixin at the start and end of {@code Player.tick}
- * (milestone M8).
+ * <p>Fabric: posted by {@code PlayerMixin} at the start and end of {@code Player.tick}.
  */
 public abstract class PlayerTickEvent extends Event {
     private final Player player;

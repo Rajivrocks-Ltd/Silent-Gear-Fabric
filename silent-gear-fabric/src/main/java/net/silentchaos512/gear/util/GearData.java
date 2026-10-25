@@ -1,5 +1,6 @@
 package net.silentchaos512.gear.util;
 
+import net.silentchaos512.gear.compat.trinkets.TrinketsCompat;
 import net.silentchaos512.lib.port.event.NeoForge;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
@@ -619,10 +620,9 @@ public final class GearData {
                     recalculateGearData(stack, player);
                 }
             }
-            if (FabricLoader.getInstance().isModLoaded(Const.CURIOS)) {
-                // Port note: Curios does not exist on Fabric, so this branch never runs. Trinkets support
-                // replaces it in milestone M8.
-                // CuriosCompat.getEquippedCurios(player).forEach(s -> recalculateGearData(s, player));
+            // Port note: upstream does this for Curios; Trinkets replaces Curios on Fabric.
+            if (FabricLoader.getInstance().isModLoaded(Const.TRINKETS)) {
+                TrinketsCompat.getEquippedTrinkets(player).forEach(s -> recalculateGearData(s, player));
             }
         }
     }

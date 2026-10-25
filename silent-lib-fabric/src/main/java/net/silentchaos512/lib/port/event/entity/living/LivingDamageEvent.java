@@ -27,7 +27,7 @@ public abstract class LivingDamageEvent extends LivingEvent {
     /**
      * Fired just before the final damage amount is subtracted from health. Listeners can change it.
      *
-     * <p>Fabric: not fired yet. Needs a mixin in {@code LivingEntity.actuallyHurt} (milestone M8).
+     * <p>Fabric: posted in {@code actuallyHurt} by {@code LivingEntityMixin} and {@code PlayerMixin}.
      */
     public static class Pre extends LivingDamageEvent {
         private float newDamage;

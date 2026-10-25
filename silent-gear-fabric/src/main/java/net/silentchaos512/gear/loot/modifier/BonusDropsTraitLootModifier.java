@@ -1,32 +1,20 @@
 package net.silentchaos512.gear.loot.modifier;
 
-import com.google.common.base.Suppliers;
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
-import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.neoforged.neoforge.common.loot.IGlobalLootModifier;
-import net.neoforged.neoforge.common.loot.LootModifier;
 import net.silentchaos512.gear.api.traits.TraitActionContext;
 import net.silentchaos512.gear.util.GearHelper;
 import net.silentchaos512.gear.util.TraitHelper;
 
-import java.util.function.Supplier;
 
-public class BonusDropsTraitLootModifier extends LootModifier {
-    public static final Supplier<MapCodec<BonusDropsTraitLootModifier>> CODEC = Suppliers.memoize(() ->
-            RecordCodecBuilder.mapCodec(inst ->
-                    codecStart(inst).apply(inst, BonusDropsTraitLootModifier::new)));
+public class BonusDropsTraitLootModifier {
+    // Port note: upstream extends NeoForge's LootModifier and is registered as a global loot modifier with a
+    // codec. Fabric has no such registry; SgLootModifiers registers doApply with Silent Lib's GlobalLootModifiers and
+    // checks the conditions that the upstream JSON file declared.
 
-    public BonusDropsTraitLootModifier(LootItemCondition[] conditionsIn, int priority) {
-        super(conditionsIn, priority);
-    }
-
-    @Override
-    protected ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> generatedLoot, LootContext context) {
+    public ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> generatedLoot, LootContext context) {
         ObjectArrayList<ItemStack> ret = new ObjectArrayList<>(generatedLoot);
         var tool = context.getOptionalParameter(LootContextParams.TOOL);
 
@@ -46,8 +34,4 @@ public class BonusDropsTraitLootModifier extends LootModifier {
         return ret;
     }
 
-    @Override
-    public MapCodec<? extends IGlobalLootModifier> codec() {
-        return CODEC.get();
-    }
 }

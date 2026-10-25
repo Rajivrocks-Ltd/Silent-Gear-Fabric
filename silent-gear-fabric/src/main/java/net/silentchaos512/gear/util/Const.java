@@ -56,6 +56,8 @@ public final class Const {
     // Mod IDs
     public static final String CAELUS = "caelus";
     public static final String CURIOS = "curios";
+    /** Port note: Trinkets replaces Curios on Fabric. */
+    public static final String TRINKETS = "trinkets";
 
     // Random
     public static final Identifier NULL_ID = Identifier.withDefaultNamespace("null");

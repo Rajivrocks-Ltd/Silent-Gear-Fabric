@@ -22,6 +22,18 @@ Forge Config API Port, Trinkets Updated and Mod Menu from Modrinth, then copy
 `silent-gear-fabric/build/libs/silent-gear-26.1.2-fabric-4.2.3.jar` into the profile's `mods` folder.
 Do not copy the `-sources.jar` files.
 
+## Automated gametests
+
+From M8 on, many checks run automatically on a headless test server (Fabric's gametest API). The tests are a
+small dev-only mod in `silent-gear-fabric/src/gametest` that is never shipped in the jar.
+
+- Run: `.\gradlew.bat :silent-gear-fabric:runGametest` (about 20 seconds). It is not part of `build`.
+- Result: the console ends with "All N required tests passed" or lists the failures. Details are in
+  `silent-gear-fabric/build/gametest/junit.xml` and `silent-gear-fabric/build/run/gameTest/logs/latest.log`.
+- "Optional" tests document known upstream bugs; they may fail without failing the run.
+- VS Code: after pulling these changes, run "Java: Clean Java Language Server Workspace" or reload the Gradle
+  project, so the editor knows the new `gametest` source folder (until then it shows "not on the classpath").
+
 ## Per-milestone quick checks
 
 ### M0 skeleton (passed 2026-10-18 with `runClient`)
@@ -107,21 +119,34 @@ Gear behavior (durability, traits, tool actions) is not wired yet, see PORTING_N
 - [x] Copy the test pack into `run-server/world/datapacks/`, type `reload` in the server console: the client
       tooltip shows durability 999 without reconnecting
 
-### M7 gear crafting
+### M7 gear crafting (core passed 2026-10-19; unticked items carried over to the M11 full pass)
 Do each step in the Fabric dev client and in the NeoForge reference instance, and note any difference.
 Survival-like checks matter here: use a crafting table, not just the creative menu. Gear *behavior*
 (durability loss, traits, tool actions) is M8, so only check crafting results and tooltips.
 - [x] `runClient` starts (new mixins load). (First run crashed on a wrong mixin target, fixed)
 - [x] Craft a blueprint (for example the pickaxe blueprint) from blueprint paper
 - [x] Craft a part with the blueprint (for example a pickaxe head from iron): **the blueprint stays in the grid**
-- [x] Craft parts from several materials, and a part from mixed materials (e.g. iron + gold)
+- [x] Craft parts from several materials. Mixed materials in one part (e.g. 2 iron + 1 gold) give **no
+      result**: upstream's compound part recipe requires all materials to be the same (retested 2026-10-25)
 - [x] Craft a full tool (pickaxe head + rod): the tool appears with the right materials in its tooltip
 - [x] Put two damaged copies of the same Silent Gear tool in the grid: **no result** (vanilla's combine
       repair must not accept them; it would wipe the parts)
-- [ ] Craft at least one of each gear type: sword, katana, machete, knife, dagger, spear, trident, mace,
+- [x] Craft at least one of each gear type: sword, katana, machete, knife, dagger, spear, trident, mace,
       shield, bow, crossbow, slingshot, arrow, pickaxe, shovel, axe, paxel, hammer, excavator, saw,
       prospector hammer, hoe, mattock, sickle, shears, fishing rod, helmet, chestplate, leggings, boots,
-      elytra, ring, bracelet, necklace. Compare stats in the tooltips (Left Ctrl) with the reference
+      elytra, ring, bracelet, necklace. Compare stats in the tooltips (Left Ctrl) with the reference.
+      (All crafted 2026-10-25, mostly with the quick recipes. The stat comparison with the reference is
+      carried over to the M11 full pass)
+- [x] A template is used up, a blueprint stays in the grid (2026-10-25)
+- [x] Part swap: an iron rod replaces the wooden rod on a diamond pickaxe; a tip and a grip go on a pickaxe
+- [x] Ring, bracelet and necklace with a diamond setting
+- [x] Vanilla tool alone in the grid converts to a Silent Gear tool. A vanilla leather helmet converts to a
+      wearable Silent Gear helmet, and a lining can be added to it (2026-10-25)
+- [x] Lined armor taken out of the grid no longer crashes (`RegistryMixin`, 2026-10-25)
+- [x] Armor tooltip says "Magic Armor", not "magic_armor" (Port fix, lang entry, 2026-10-25)
+- [x] Helmet plates alone in the grid give a wearable helmet (no lining needed) (2026-10-25). The +8 magic
+      armor comes from the leather plates (upstream data), not from the lining; a wool lining adds knockback
+      resistance and Flexible
 - [ ] Each station works and shows its progress arrow while working: Alloy Forge, Crude Mixer, Super Mixer,
       Recrystallizer, Refabricator, Material Grader, Metal Press, Paint Mixer, Salvager, Starlight Charger,
       Stone Anvil
@@ -131,6 +156,64 @@ Survival-like checks matter here: use a crafting table, not just the creative me
 - [ ] JEI (dev runtime only): press R on an item to see recipes, U to see uses. Silent Gear adds its own
       pages: gear crafting, Alloy Forge and mixers, Material Grader, Salvager, tool actions. Blueprint and
       part recipes show in the crafting table page
+
+### M8 gear behavior (passed 2026-10-25)
+Most of this list is now checked by automated gametests (see "Automated gametests" above), marked "(auto)".
+Result of the first full run, 2026-10-25: all required tests pass. What is left for a person is what a server
+test cannot see: the client, real movement, and things that need time in the world. Fabric dev client
+(Trinkets is loaded there); make the gear in creative or with JEI and hold Left Ctrl to see traits. Compare
+with the NeoForge reference when something looks off.
+- [x] `runClient` starts and a world loads. (The gametest server already loads every common mixin; this
+      checks the client side)
+- [x] Durability (auto): a gear pickaxe loses durability when mining, and at its last point it becomes broken
+      and stays in the hand. A broken gear axe mines slowly, and so does a broken pickaxe or hammer (Port fix
+      2026-10-25; upstream's broken pickaxe kept full speed)
+- [x] Broken pickaxe in play: the break sound plays once, and the very next block mines very slowly
+      (first try 2026-10-25: slow worked, but the sound played twice with one fast block between; fixed and
+      confirmed)
+- [x] Durability bar on a gear tool matches the tooltip (client only)
+- [x] Repair in an anvil (auto): damaged pickaxe + iron ingots is repaired and costs XP; pickaxe + spoon
+      upgrade gets the Spoon trait and mines dirt faster
+- [x] Upgrade in the crafting grid: pickaxe + spoon upgrade gives a pickaxe that mines dirt fast (2026-10-25;
+      the advanced upgrade base takes diamond shards, which are the `c:nuggets/diamond` item)
+- [x] Mining speed (auto): Lustrous (diamond) mines faster in light than in the dark
+- [x] XP (auto): Ancient (stone gives level 2) adds 25% per level to block and mob experience; mined ores
+      drop experience through the block drops hook
+- [x] Bonus drops (auto): Gold Digger (dimerald head, or a tyrian steel tip) gives clearly more gold nuggets
+      from nether gold ore than iron
+- [x] Magmatic (auto): a pickaxe with a **crimson steel tip** drops iron ingots from iron ore
+- [x] Enchantment traits (auto): Silky (brass head, or an amethyst tip) mines glass like Silk Touch
+- [x] Mob drops (auto): cows, pigs and sheep drop sinew; zombies and husks leather scraps; spiders fine silk
+- [x] Fuel (auto): wood gear (Flammable) is furnace fuel, iron gear is not
+- [x] Fuel in a real furnace: a wood gear sword burns and the flame lasts
+- [x] Shears (auto): gear shears shear a sheep, cut a leash, collect honeycomb, carve a pumpkin; broken
+      shears do not shear
+- [x] Axe, shovel, hoe (auto): strip a log, make a path, till dirt; a broken axe does nothing
+- [x] Sword sweep (auto): a full strength gear sword attack also hurts the mob next to the target
+- [x] Fishing rod (auto): the hook of a cast gear fishing rod stays out
+- [x] Fishing rod: you can actually catch a fish (survival, 2026-10-25)
+- [x] Armor (auto): a gold gear helmet (Brilliant) keeps piglins calm
+- [x] Snow Walker (auto, Port fix 2026-10-25): leather gear boots let the wearer walk on powder snow
+      (upstream never did; see PORTING_NOTES)
+- [x] Snow Walker in play: walk onto powder snow with leather or wool gear boots, you should not sink
+      (2026-10-25). Note: gear leather armor is not in `minecraft:freeze_immune_wearables` (upstream neither), so
+      it does not stop freezing like vanilla leather does. Freezing itself works: 7 seconds inside powder snow,
+      then damage every 2 seconds (gametest `playerFreezesInPowderSnow`)
+- [x] Moonwalker and Bounce (auto): azure silver boots take less fall damage; boots with a **slime lining**
+      take none
+- [x] Moonwalker and Bounce feel right in play (2026-10-25). Moonwalker boots show "-60% Gravity" twice in
+      the tooltip: upstream bug, the modifier is stored twice but applies once (see PORTING_NOTES)
+- [x] Swift Swim (auto): a ring with a **prismarine setting** raises the swim speed attribute in the ring slot
+- [x] Swift Swim: you really swim faster with that ring (2026-10-25)
+- [x] Elytra (auto): a gear elytra can glide from the chest slot and has durability
+- [x] Elytra: gliding works in play and costs durability, from the chest slot and from the Back slot
+- [x] Trinkets (auto): the player has Ring, Bracelet, Necklace and Back slots; ring, bracelet, necklace and
+      elytra each fit their slot (a ring does not fit the necklace slot); using a ring equips it; trinkets
+      are kept on death; a gold ring calms piglins
+- [x] Trinkets slots show in the inventory screen with their icons (2026-10-25). The "hand" group (Ring, Bracelet) has its
+      own extra slot above the offhand slot; the "chest" group (Necklace, Back) opens from the chestplate slot.
+      Hover or click each to see the slots inside
+- [x] Tooltip (auto): a ring does not say "Requires Trinkets to equip"
 
 ## Full pass (M11 and Phase 2)
 

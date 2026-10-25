@@ -43,10 +43,19 @@ sourceSets.main.resources {
 
 sourceSets.main.java {
 	// Upstream code that is ported in a later milestone. Nothing else in the build uses these files.
-	// M8: NeoForge global loot modifiers, to become Fabric LootTableEvents.MODIFY_DROPS listeners.
-	exclude("net/silentchaos512/gear/loot/modifier/**")
 	// M10: data generator base classes (they use NeoForge's DataGenerator API).
 	exclude("net/silentchaos512/gear/api/data/**/*ProviderBase.java")
+}
+
+// Automated gametests (dev only, not in the jar). The tests are a small separate mod, "silentgear-gametest",
+// that Fabric's gametest server finds through the "fabric-gametest" entrypoint. Run them with
+// `.\gradlew.bat :silent-gear-fabric:runGametest`. They are not part of `build`, so a failing test never
+// blocks a normal build. Results: build/gametest/junit.xml and build/run/gameTest/logs/latest.log.
+sourceSets {
+	gametest {
+		compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output
+		runtimeClasspath += sourceSets.main.runtimeClasspath + sourceSets.main.output
+	}
 }
 
 loom {
@@ -63,6 +72,16 @@ loom {
 		server {
 			runDir "run-server"
 		}
+		// Headless gametest server: runs every test once, writes a JUnit report and exits.
+		gametest {
+			server()
+			name = "Game Test"
+			source sourceSets.gametest
+			vmArg "-Dfabric-api.gametest"
+			vmArg "-Dfabric-api.gametest.report-file=${project.file('build/gametest/junit.xml')}"
+			runDir "build/run/gameTest"
+			ideConfigGenerated = false
+		}
 	}
 
 	// Tell Loom which source sets belong to which mod, so the dev launcher
@@ -73,6 +92,9 @@ loom {
 		}
 		silentlib {
 			sourceSet("main", ":silent-lib-fabric")
+		}
+		"silentgear-gametest" {
+			sourceSet sourceSets.gametest
 		}
 	}
 }

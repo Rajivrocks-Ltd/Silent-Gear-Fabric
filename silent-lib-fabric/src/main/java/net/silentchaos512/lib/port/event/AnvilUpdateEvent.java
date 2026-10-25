@@ -8,7 +8,7 @@ import org.jspecify.annotations.Nullable;
  * Fired when the items in an anvil change. A listener that sets a non-empty output replaces the
  * vanilla result. Canceling it leaves the anvil with no result.
  *
- * <p>Fabric: not fired yet. Needs a mixin in {@code AnvilMenu.createResult} (milestone M8).
+ * <p>Fabric: posted by {@code AnvilMenuMixin} after {@code AnvilMenu.createResult}.
  */
 public class AnvilUpdateEvent extends CancellableEvent {
     private final ItemStack left;

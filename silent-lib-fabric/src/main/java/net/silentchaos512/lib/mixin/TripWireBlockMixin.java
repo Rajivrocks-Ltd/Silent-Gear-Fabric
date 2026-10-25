@@ -1,0 +1,24 @@
+package net.silentchaos512.lib.mixin;
+
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.TripWireBlock;
+import net.silentchaos512.lib.port.ItemAbilities;
+import net.silentchaos512.lib.port.internal.ItemAbilityChecks;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+
+/**
+ * Lets any item with {@code shears_disarm} break tripwire without triggering it, as NeoForge's patch does.
+ *
+ * <p>Fabric port only.
+ */
+@Mixin(TripWireBlock.class)
+public abstract class TripWireBlockMixin {
+    @WrapOperation(method = "playerWillDestroy", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;is(Ljava/lang/Object;)Z"))
+    private boolean silentlib$shearsAbility(ItemStack stack, Object item, Operation<Boolean> original) {
+        return ItemAbilityChecks.isOrCanPerform(stack, item, original, Items.SHEARS, ItemAbilities.SHEARS_DISARM);
+    }
+}

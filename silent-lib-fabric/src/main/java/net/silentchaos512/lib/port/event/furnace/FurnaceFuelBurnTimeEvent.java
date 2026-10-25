@@ -7,8 +7,9 @@ import net.silentchaos512.lib.port.event.CancellableEvent;
  * Fired when a furnace asks how long an item stack burns. Listeners can change the time;
  * 0 means it is not a fuel.
  *
- * <p>Fabric: not fired yet. Fabric's {@code FuelValueEvents} only maps items to fixed times, while
- * this event sees the whole stack. Needs a mixin in {@code FuelValues.burnDuration} (milestone M8).
+ * <p>Fabric: posted by {@code FuelValuesMixin} from {@code FuelValues.burnDuration}, with the vanilla time as the
+ * starting value. Fabric's {@code FuelValueEvents} only maps items to fixed times, while this event sees the
+ * whole stack.
  */
 public class FurnaceFuelBurnTimeEvent extends CancellableEvent {
     private final ItemStack itemStack;
