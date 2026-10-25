@@ -47,6 +47,25 @@ Automated gametests run on a headless server:
 .\gradlew.bat :silent-gear-fabric:runGametest
 ```
 
+## Publishing
+
+Release jars (with sources and javadoc) are published to this repository's GitHub Packages, like upstream:
+
+```
+.\gradlew.bat publish
+```
+
+This needs a GitHub personal access token with the `write:packages` permission in `~/.gradle/gradle.properties`
+(never in this repository):
+
+```
+gpr.username=<GitHub user name>
+gpr.token=<token>
+```
+
+Packages: `net.silentchaos512:silent-lib-26.1.2-fabric` and `net.silentchaos512:silent-gear-26.1.2-fabric`. The
+version stays the mod version (for example 4.2.3), so publish each version once.
+
 ## Runtime dependencies
 
 - Fabric Loader 0.19.5 or newer
