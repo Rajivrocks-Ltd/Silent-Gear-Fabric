@@ -201,8 +201,9 @@ with the NeoForge reference when something looks off.
       then damage every 2 seconds (gametest `playerFreezesInPowderSnow`)
 - [x] Moonwalker and Bounce (auto): azure silver boots take less fall damage; boots with a **slime lining**
       take none
-- [x] Moonwalker and Bounce feel right in play (2026-10-25). Moonwalker boots show "-60% Gravity" twice in
-      the tooltip: upstream bug, the modifier is stored twice but applies once (see PORTING_NOTES)
+- [x] Moonwalker and Bounce feel right in play (2026-10-25). Moonwalker boots showed "-60% Gravity" twice in
+      the tooltip: upstream bug, fixed as a Port fix 2026-10-25 (see PORTING_NOTES)
+- [x] Moonwalker boots tooltip shows "-60% Gravity" once, and gravity still feels lower (2026-10-25)
 - [x] Swift Swim (auto): a ring with a **prismarine setting** raises the swim speed attribute in the ring slot
 - [x] Swift Swim: you really swim faster with that ring (2026-10-25)
 - [x] Elytra (auto): a gear elytra can glide from the chest slot and has durability

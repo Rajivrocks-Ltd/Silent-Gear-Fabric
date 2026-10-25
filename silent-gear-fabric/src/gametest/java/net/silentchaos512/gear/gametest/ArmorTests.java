@@ -1,5 +1,11 @@
 package net.silentchaos512.gear.gametest;
 
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -100,6 +106,37 @@ public class ArmorTests {
         ItemStack elytra = GearTestUtil.gear(GearItemSets.ELYTRA, "phantom_membrane");
         helper.assertTrue(elytra.getMaxDamage() > 0, "elytra should have durability");
         helper.assertTrue(LivingEntity.canGlideUsing(elytra, EquipmentSlot.CHEST), "a gear elytra should glide from the chest slot");
+        helper.succeed();
+    }
+
+    /**
+     * Each attribute modifier is stored once on gear (Port fix 2026-10-25: upstream added trait modifiers twice, so
+     * tooltips showed lines like "-60% Gravity" twice). Checks Moonwalker boots and a few other gear items.
+     *
+     * @param helper the test helper
+     */
+    @GameTest
+    public void attributeModifiersAreNotDuplicated(GameTestHelper helper) {
+        ItemStack moonBoots = GearTestUtil.gear(GearItemSets.BOOTS, "azure_silver");
+        var bootModifiers = moonBoots.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY).modifiers();
+        long gravity = bootModifiers.stream().filter(e -> e.attribute().is(Attributes.GRAVITY)).count();
+        helper.assertValueEqual(gravity, 1L, "gravity modifiers on Moonwalker boots");
+
+        List<ItemStack> gear = List.of(
+                moonBoots,
+                GearTestUtil.gear(GearItemSets.HELMET, "gold"),
+                GearTestUtil.gear(GearItemSets.PICKAXE, "diamond"),
+                GearTestUtil.gear(GearItemSets.SWORD, "iron"),
+                GearTestUtil.gear(GearItemSets.ELYTRA, "phantom_membrane"),
+                GearTestUtil.gear(GearItemSets.RING, "gold", GearTestUtil.part(SgItems.SETTING, "prismarine"))
+        );
+        for (ItemStack stack : gear) {
+            Set<String> seen = new HashSet<>();
+            for (var entry : stack.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY).modifiers()) {
+                String key = entry.attribute().getRegisteredName() + " " + entry.modifier().id() + " " + entry.slot();
+                helper.assertTrue(seen.add(key), stack.getItem() + " has a duplicate modifier: " + key);
+            }
+        }
         helper.succeed();
     }
 
