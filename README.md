@@ -1,5 +1,7 @@
 # Silent Gear (Fabric port)
 
+**Work in progress**. This branch is the port to Minecraft 26.2 and is not released. For a working version, use branch 26.1.2 or the latest release.
+
 An **unofficial** port of [Silent Gear](https://github.com/SilentChaos512/Silent-Gear) and the parts of
 [Silent Lib](https://github.com/SilentChaos512/SilentLib) it needs, from NeoForge to Fabric.
 
