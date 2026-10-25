@@ -1,0 +1,44 @@
+// Publishing to GitHub Packages, shared by silent-lib-fabric and silent-gear-fabric.
+//
+// Same setup as upstream Silent Gear and Silent Lib: a Maven publication with the jar, the sources jar and the
+// javadoc jar, published to this repository's GitHub Packages by hand with `.\gradlew.bat publish`.
+//
+// Credentials are read from the publisher's own ~/.gradle/gradle.properties (never from this repository):
+//   gpr.username=<GitHub user name>
+//   gpr.token=<personal access token with the write:packages permission>
+// GITHUB_ACTOR and GITHUB_TOKEN are used instead when set (GitHub Actions). Without credentials every other task
+// still works; only the publish tasks fail. Gradle runs `publish` without the configuration cache, because it does
+// not support credentials set this way; that only makes that one command a little slower.
+
+apply plugin: 'maven-publish'
+
+java {
+	withJavadocJar()
+}
+
+javadoc {
+	options.encoding = 'UTF-8'
+	// Upstream javadoc is not complete enough for strict doclint; upstream also sets failOnError = false.
+	options.addStringOption('Xdoclint:none', '-quiet')
+	failOnError = false
+}
+
+publishing {
+	repositories {
+		maven {
+			name = 'GitHubPackages'
+			url = uri("https://maven.pkg.github.com/${project.github_repo}")
+			credentials {
+				username = (findProperty('gpr.username') ?: System.getenv('GITHUB_ACTOR')) as String
+				password = (findProperty('gpr.token') ?: System.getenv('GITHUB_TOKEN')) as String
+			}
+		}
+	}
+	publications {
+		gpr(MavenPublication) {
+			// Same artifact names as the jars, for example silent-gear-26.1.2-fabric (upstream: ...-neoforge).
+			artifactId = base.archivesName.get()
+			from components.java
+		}
+	}
+}

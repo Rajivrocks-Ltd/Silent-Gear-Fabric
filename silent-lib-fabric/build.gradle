@@ -56,6 +56,9 @@ java {
 	targetCompatibility = JavaVersion.VERSION_25
 }
 
+// Maven publication for GitHub Packages (jar, sources, javadoc), see gradle/publishing.gradle.
+apply from: rootProject.file('gradle/publishing.gradle')
+
 jar {
 	from(rootProject.file("LICENSE")) {
 		rename { "${it}_silentlib" }
