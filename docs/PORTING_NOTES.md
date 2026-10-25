@@ -506,17 +506,17 @@ Marked `Port fix:` in the code. These bugs are in upstream itself, so they also 
   that point, the break sound played but the tool stayed whole, so the next block still mined at full speed and
   the sound played again when it really broke. It now uses the damage after traits. Gametest
   `breakCallbackRunsOnceWhenReallyBroken`.
+- **Trait tooltip lines showed twice** (approved 2026-10-25). `GearItem.buildAttributes` added every trait's
+  attribute modifiers, and `GearData.setGearAttributeModifiers` added them again, so each was stored twice with the
+  same id (only one applied in play) and the tooltip showed lines like "-60% Gravity" twice, on every gear item
+  with an attribute trait. The default `GearItem.buildAttributes` now adds nothing; `GearData` still adds the
+  trait modifiers once for every gear item. Gametest `attributeModifiersAreNotDuplicated`.
 - **Magic armor showed as "magic_armor" in tooltips** (approved 2026-10-25). `SgAttributes.MAGIC_ARMOR` uses
   the bare string `magic_armor` as its translation key, and no upstream lang file defines it. en_us.json now
   has `"magic_armor": "Magic Armor"`. Lang data only, no code change; other languages still show the raw key.
 
 ## Upstream issues (same on NeoForge, not changed by the port)
 
-- **Attribute traits are added twice.** `GearItem.buildAttributes` adds every trait's attribute modifiers, and
-  `GearData.setGearAttributeModifiers` then loops over the traits again, so the attribute modifier component
-  holds each trait modifier twice (same id). In play only one applies, because vanilla replaces a modifier with
-  the same id; the tooltip shows the line twice (for example "-60% Gravity" on Moonwalker boots). Found
-  2026-10-25. Not changed; NeoForge's own tooltip code may or may not hide the duplicate.
 - **Block model warnings** for `alloy_forge`, `salvager`, `gear_smithing_table`, `refabricator`,
   `material_grader` (unused parent texture slots) and `phantom_light` (no blockstate file, it is invisible).
 
