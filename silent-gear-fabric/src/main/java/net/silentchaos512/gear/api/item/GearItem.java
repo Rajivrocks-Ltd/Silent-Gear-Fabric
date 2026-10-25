@@ -80,7 +80,7 @@ public interface GearItem extends ItemLike {
      * Adds the item's own attribute modifiers (for example armor values). Trait modifiers are added afterwards by
      * {@code GearData.setGearAttributeModifiers}, for every gear item.
      *
-     * <p>Port fix (user approved 2026-10-25): upstream's default also added every trait's modifiers here, so each
+     * <p>Port fix (2026-10-25): upstream's default also added every trait's modifiers here, so each
      * trait modifier was stored twice (same id) and its tooltip line showed twice, for example "-60% Gravity" on
      * Moonwalker boots. Only one copy ever applied in play. The default now adds nothing.
      *

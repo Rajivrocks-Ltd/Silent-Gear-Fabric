@@ -3,7 +3,8 @@
 An **unofficial** port of [Silent Gear](https://github.com/SilentChaos512/Silent-Gear) and the parts of
 [Silent Lib](https://github.com/SilentChaos512/SilentLib) it needs, from NeoForge to Fabric.
 
-Status: work in progress. Phase 1 targets Minecraft 26.1.2. Phase 2 will move to 26.2.
+Status: the port of Silent Gear 4.2.3 for Minecraft 26.1.2 is complete (branch `26.1.2`). The move to
+Minecraft 26.2 is in progress (branch `26.2`).
 This port is not made or supported by SilentChaos512. Please report port bugs here, not upstream.
 
 ## Credits
@@ -33,6 +34,19 @@ To start a dev client with both mods loaded:
 .\gradlew.bat :silent-gear-fabric:runClient
 ```
 
+## Branches
+
+One branch per Minecraft version, like upstream: `26.1.2` and `26.2`. `main` points to the newest version.
+Release tags name the mod version and the Minecraft version, for example `4.2.3+26.1.2`.
+
+## Tests
+
+Automated gametests run on a headless server:
+
+```
+.\gradlew.bat :silent-gear-fabric:runGametest
+```
+
 ## Runtime dependencies
 
 - Fabric Loader 0.19.5 or newer
@@ -47,5 +61,5 @@ To start a dev client with both mods loaded:
 |---|---|
 | `silent-lib-fabric/` | Ported Silent Lib subset |
 | `silent-gear-fabric/` | The Silent Gear port |
-| `docs/` | Port plan support files: API inventory, API mapping, porting notes, test checklist |
+| `docs/` | Port plan, API inventory, API mapping, porting notes, test checklist |
 | `reference/` | Upstream clones for reference, git-ignored |

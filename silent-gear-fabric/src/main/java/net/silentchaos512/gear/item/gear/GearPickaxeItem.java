@@ -42,7 +42,7 @@ public class GearPickaxeItem extends BasicGearItem implements GearDiggerTool {
     /**
      * Gets the mining speed. A working pickaxe uses vanilla's tool component, as upstream does.
      *
-     * <p>Port fix (user approved 2026-10-25): upstream's broken pickaxe keeps its tool component and mines at full
+     * <p>Port fix (2026-10-25): upstream's broken pickaxe keeps its tool component and mines at full
      * speed, unlike the broken axe and shovel. A broken pickaxe (and the hammer, paxel and prospector hammer,
      * which extend it) now gets the same slow broken speed from {@link GearHelper#getDestroySpeed}.
      *

@@ -4,11 +4,18 @@
 
 **Strategy (two phases):**
 
-1. **Phase 1, same-version port:** port the latest upstream Silent Gear (4.2.1, NeoForge, Minecraft 26.1.2) to Fabric on the *same* Minecraft version (26.1.2). Only the loader changes, so every bug found is a porting bug, not a version bug.
+1. **Phase 1, same-version port:** port the latest upstream Silent Gear (4.2.3, NeoForge, Minecraft 26.1.2) to Fabric on the *same* Minecraft version (26.1.2). Only the loader changes, so every bug found is a porting bug, not a version bug.
 2. **Phase 2, version bump:** once Phase 1 is validated, move the Fabric port from 26.1.2 to 26.2.
 
-**Working model:** Claude Code does the large refactors, you do all testing by hand in game. Every milestone below ends with a green `./gradlew build` (Claude Code) and a manual test checklist (you).
+**Working model:** every milestone below ends with a green `./gradlew build` and a manual test checklist in game.
+From M8 on, many checks also run automatically as gametests (`runGametest`).
 
+**Status:** Phase 1 is complete (2026-10-25, upstream 4.2.3 on Minecraft 26.1.2, branch `26.1.2`). Phase 2 is on
+branch `26.2`.
+
+> Upstream moved from 4.2.1 to 4.2.3 during the port, so 4.2.3 was ported. Older version numbers below are from
+> the original research.
+>
 > Note on "Forge APIs": current Silent Gear is built on **NeoForge**, not Minecraft Forge. The reference APIs we port *from* are NeoForge's. Minecraft Forge is not needed for this project.
 
 ---
@@ -30,10 +37,10 @@
 **Decisions to lock in now:**
 
 - [ ] **Mod id:** keep `silentgear` so existing data packs and add-on data stay compatible. Display name e.g. "Silent Gear (Fabric)".
-- [ ] **Single-loader repo:** Fabric only, no Architectury or multiloader setup. Simpler for Claude Code and for manual testing.
+- [ ] **Single-loader repo:** Fabric only, no Architectury or multiloader setup. Simpler to build and to test.
 - [ ] **Silent Lib strategy:** port it as a Gradle subproject (`silent-lib-fabric`) inside the same repo, and only port the parts Silent Gear actually uses. This keeps it reusable for other Silent mods later.
 - [ ] **Accessory API:** Trinkets Updated (`eu.pb4:trinkets`, has 26.1 and 26.2 builds) or Accessories. Recommendation: Trinkets Updated, since its API is shared across Fabric and NeoForge and it has 26.2 builds.
-- [ ] **Recipe viewer:** JEI (Fabric) or EMI. Verify which has a 26.1.2 Fabric build at the time you reach milestone M8. Treat as optional.
+- [ ] **Recipe viewer:** JEI (Fabric) or EMI. Verify which has a 26.1.2 Fabric build when milestone M8 is reached. Treat as optional.
 - [ ] **Courtesy:** let SilentChaos512 know about the port (Discord or GitHub issue). Not required by MIT, but good practice and avoids duplicate effort.
 
 ---
@@ -43,7 +50,6 @@
 - [ ] Install **JDK 25** (Eclipse Temurin is the usual choice). Set `JAVA_HOME`.
 - [ ] Install **IntelliJ IDEA** (Community is fine) plus the **Minecraft Development** plugin.
 - [ ] Install **Git**.
-- [ ] Install **Claude Code** and confirm it can run `./gradlew` in the repo.
 - [ ] Install a launcher for manual testing: **Prism Launcher** (recommended, easy side-by-side instances) or the Modrinth App.
 - [ ] Create a **GitHub personal access token** with `read:packages`. Only needed to build the upstream NeoForge reference, because Silent Lib and silent-utils are published on GitHub Packages. Put it in `~/.gradle/gradle.properties`:
   ```properties
@@ -83,7 +89,7 @@ git clone https://github.com/SilentChaos512/silent-utils.git
 ### 2.2 Fabric resources
 
 - [ ] **Fabric template mod** for 26.1.2: generate one at https://fabricmc.net/develop/template/ (gives a correct `build.gradle`, `settings.gradle`, `gradle.properties`, `fabric.mod.json` for 26.x).
-- [ ] **Fabric API source** for reference: `git clone https://github.com/FabricMC/fabric.git` and check out the 26.1.2 branch. Useful for Claude Code to read real API signatures.
+- [ ] **Fabric API source** for reference: `git clone https://github.com/FabricMC/fabric.git` and check out the 26.1.2 branch. Useful to read real API signatures.
 - [ ] **Fabric documentation:** https://docs.fabricmc.net/develop/ (bookmark: Porting, Mappings, Data Generation, Networking, Rendering).
 - [ ] **Fabric API 26.1 porting guide** (lists the Yarn to Mojang renames inside Fabric API itself). Important: many Fabric API class names changed in 26.1, so old tutorials will use outdated names.
 - [ ] **"Fabric for Minecraft 26.1" blog post** on fabricmc.net (high-level API changes).
@@ -109,7 +115,7 @@ git clone https://github.com/SilentChaos512/silent-utils.git
 ### 2.5 Manual test instances (Prism Launcher)
 
 - [ ] **Instance A, reference:** NeoForge 26.1.2 + Silent Lib 11.2.0 + Silent Gear 4.2.1 (from Modrinth/CurseForge). This is the "how it should behave" baseline.
-- [ ] **Instance B, port:** Fabric 26.1.2 + Fabric API + Forge Config API Port + Trinkets + your built jars.
+- [ ] **Instance B, port:** Fabric 26.1.2 + Fabric API + Forge Config API Port + Trinkets + the built port jars.
 - [ ] Optional **dedicated server** for each, to catch client/server sync bugs.
 
 ---
@@ -126,7 +132,6 @@ silent-gear-fabric/
     NEOFORGE_API_INVENTORY.md
     API_MAPPING.md           # NeoForge -> Fabric lookup table (section 4)
     TEST_CHECKLIST.md        # manual test cases (section 7)
-  CLAUDE.md                  # standing instructions for Claude Code
   settings.gradle
   build.gradle
   gradle.properties
@@ -135,8 +140,9 @@ silent-gear-fabric/
 - [ ] Create the repo, add `reference/` to `.gitignore`.
 - [ ] Start from the Fabric template build files, then turn it into a two-subproject build.
 - [ ] Copy upstream `LICENSE` and add a credits section to the README.
-- [ ] Write `CLAUDE.md` (template in section 9).
-- [ ] Branching: `main` (always builds), one branch per milestone (`m2-registries`, etc.), merge after your manual test passes.
+- [ ] Branching: one long-lived branch per Minecraft version (`26.1.2`, `26.2`), like upstream. Work happens on short
+  branches (one per milestone or fix) that merge into their version branch after the manual test passes. `main`
+  points to the newest version.
 
 ---
 
@@ -180,65 +186,65 @@ Fabric API module names below are the pre-26.1 names. Some modules and classes w
 
 ---
 
-## 5. Phase 1: port Silent Gear 4.2.1 to Fabric 26.1.2
+## 5. Phase 1: port Silent Gear 4.2.3 to Fabric 26.1.2
 
-Each milestone: Claude Code implements and gets `./gradlew build` green, then you run `./gradlew runClient` (and `runServer` where noted) and work through the checklist. Commit only after your test passes.
+Each milestone: implement and get `./gradlew build` green, then run `./gradlew runClient` (and `runServer` where noted) and work through the checklist. Commit only after the test passes.
 
 ### M0. Skeleton boots
-- **Claude Code:** set up the two-subproject Gradle build from the Fabric template, Java 25, Loom (non-remapping), Fabric API, Forge Config API Port, Trinkets, mixbox via jar-in-jar. Empty initializers that log a message.
-- **You test:** game launches to title screen, mod appears in the mod list, log shows the init message, no errors.
+- **Work:** set up the two-subproject Gradle build from the Fabric template, Java 25, Loom (non-remapping), Fabric API, Forge Config API Port, Trinkets, mixbox via jar-in-jar. Empty initializers that log a message.
+- **Test:** game launches to title screen, mod appears in the mod list, log shows the init message, no errors.
 
 ### M1. Inventory and triage (no code changes)
-- **Claude Code:** scan the reference repos and produce `docs/NEOFORGE_API_INVENTORY.md`:
+- **Work:** scan the reference repos and produce `docs/NEOFORGE_API_INVENTORY.md`:
   - every `net.neoforged.*` import in Silent Gear and Silent Lib, grouped by category from section 4, with file counts
   - every `IItemExtension` / `IBlockExtension` method overridden
   - every event subscribed to
   - every Silent Lib class Silent Gear uses (this defines the Silent Lib port scope)
   - every resource file containing `neoforge:` keys (conditions, loot modifiers, biome modifiers, data maps, ingredients)
   - access transformer entries and existing mixins
-- **You review:** sanity-check the list, confirm Silent Lib scope, update `API_MAPPING.md` with anything new.
+- **Review:** sanity-check the list, confirm Silent Lib scope, update `API_MAPPING.md` with anything new.
 
 ### M2. Silent Lib subset
-- **Claude Code:** port only the Silent Lib classes listed in M1 into `silent-lib-fabric`. Replace its NeoForge registration, networking, and config code using section 4.
-- **You test:** game boots with both mods, no missing class errors.
+- **Work:** port only the Silent Lib classes listed in M1 into `silent-lib-fabric`. Replace its NeoForge registration, networking, and config code using section 4.
+- **Test:** game boots with both mods, no missing class errors.
 
 ### M3. Resources copied as-is, then patched
 Big shortcut: most of Silent Gear's content is JSON (materials, parts, traits, recipes, models, lang) and is loader-agnostic.
-- **Claude Code:** copy `src/main/resources` and `src/generated/resources` from upstream. Replace `neoforge.mods.toml` with `fabric.mod.json`. Convert every `neoforge:` construct found in M1 (conditions, ingredients, loot modifiers, biome modifiers) to Fabric equivalents or note it for code in later milestones.
-- **You test:** boots, no resource parse errors in the log.
+- **Work:** copy `src/main/resources` and `src/generated/resources` from upstream. Replace `neoforge.mods.toml` with `fabric.mod.json`. Convert every `neoforge:` construct found in M1 (conditions, ingredients, loot modifiers, biome modifiers) to Fabric equivalents or note it for code in later milestones.
+- **Test:** boots, no resource parse errors in the log.
 
 ### M4. Registries and basic content
-- **Claude Code:** port registration of blocks, items, block entities, menus, recipe types and serializers, custom registries, creative tabs, sounds, data components.
-- **You test:** creative tab is populated, all items have names and textures (static ones at least), blocks place and break, no missing-registry errors.
+- **Work:** port registration of blocks, items, block entities, menus, recipe types and serializers, custom registries, creative tabs, sounds, data components.
+- **Test:** creative tab is populated, all items have names and textures (static ones at least), blocks place and break, no missing-registry errors.
 
 ### M5. Data-driven systems
-- **Claude Code:** port reload listeners for materials, parts, traits, gear types, plus the trait/effect type registries.
-- **You test:** `/reload` works without errors, material count in log matches the NeoForge reference instance, a custom test data pack overriding one material is picked up.
+- **Work:** port reload listeners for materials, parts, traits, gear types, plus the trait/effect type registries.
+- **Test:** `/reload` works without errors, material count in log matches the NeoForge reference instance, a custom test data pack overriding one material is picked up.
 
 ### M6. Networking and sync
-- **Claude Code:** port all payloads and the material/part/trait sync to clients on join and after `/reload`.
-- **You test:** with `runServer` + client, join the server, tooltips show correct material stats on the client, `/reload` on the server updates client tooltips.
+- **Work:** port all payloads and the material/part/trait sync to clients on join and after `/reload`.
+- **Test:** with `runServer` + client, join the server, tooltips show correct material stats on the client, `/reload` on the server updates client tooltips.
 
 ### M7. Gear crafting
-- **Claude Code:** blueprints, templates, part crafting, gear assembly recipes, vanilla-to-gear conversion recipes, repair kits, crafting station blocks and their menus/screens, block entity inventories.
-- **You test:** craft a blueprint, parts from several materials, and at least one of every gear type (tool, weapon, armor, bow/crossbow, curio-type item). Use each crafting block. Compare outputs against reference instance A.
+- **Work:** blueprints, templates, part crafting, gear assembly recipes, vanilla-to-gear conversion recipes, repair kits, crafting station blocks and their menus/screens, block entity inventories.
+- **Test:** craft a blueprint, parts from several materials, and at least one of every gear type (tool, weapon, armor, bow/crossbow, curio-type item). Use each crafting block. Compare outputs against reference instance A.
 
 ### M8. Gear behavior
-- **Claude Code:** mining speed and harvest levels, tool actions (strip, till, path, shear), durability and broken-gear behavior, repair in crafting grid and anvil, traits (each trait effect type), armor stats, ranged weapons, elytra-style flight, Trinkets integration, configs, optional recipe viewer plugin.
-- **You test:** break blocks of every tier with matching and non-matching tools, use each tool action, take damage with armor, break and repair gear, trigger a sample of traits from each trait effect type, equip an accessory item in a Trinkets slot, edit a config value and confirm it applies.
+- **Work:** mining speed and harvest levels, tool actions (strip, till, path, shear), durability and broken-gear behavior, repair in crafting grid and anvil, traits (each trait effect type), armor stats, ranged weapons, elytra-style flight, Trinkets integration, configs, optional recipe viewer plugin.
+- **Test:** break blocks of every tier with matching and non-matching tools, use each tool action, take damage with armor, break and repair gear, trigger a sample of traits from each trait effect type, equip an accessory item in a Trinkets slot, edit a config value and confirm it applies.
 
 ### M9. Client rendering (highest risk, budget extra time)
-- **Claude Code:** dynamic layered gear models, material-based tinting, broken-gear model state, armor rendering, custom tooltip components, screens and key mappings.
-- **You test:** gear made from different materials looks different and matches reference instance A, inventory and hand rendering, armor on player, tooltips (normal and expanded), all GUIs.
+- **Work:** dynamic layered gear models, material-based tinting, broken-gear model state, armor rendering, custom tooltip components, screens and key mappings.
+- **Test:** gear made from different materials looks different and matches reference instance A, inventory and hand rendering, armor on player, tooltips (normal and expanded), all GUIs.
 
 ### M10. Datagen (optional for release)
-- **Claude Code:** port data generators to Fabric's data generation API, run datagen, diff the output against the copied `src/generated/resources`.
-- **You review:** the diff should be empty or only expected Fabric/NeoForge format differences. Until this is done, keep using the copied generated resources.
+- **Work:** port data generators to Fabric's data generation API, run datagen, diff the output against the copied `src/generated/resources`.
+- **Review:** the diff should be empty or only expected Fabric/NeoForge format differences. Until this is done, keep using the copied generated resources.
 
 ### M11. Phase 1 full validation
-- **You test:** the full `docs/TEST_CHECKLIST.md` (section 7) in singleplayer and on a dedicated server, side by side with reference instance A.
+- **Test:** the full `docs/TEST_CHECKLIST.md` (section 7) in singleplayer and on a dedicated server, side by side with reference instance A.
 - **Exit criteria:** no crashes, no errors in logs during the test pass, behavior matches the reference for every checklist item, or deviations are documented in `PORTING_NOTES.md` as known gaps.
-- Tag the release `fabric-26.1.2-4.2.1-port.1`.
+- Tag the release `4.2.3+26.1.2` (mod version, then Minecraft version).
 
 ---
 
@@ -246,10 +252,10 @@ Big shortcut: most of Silent Gear's content is JSON (materials, parts, traits, r
 
 - [ ] **Check upstream first:** see if SilentChaos512 has published a NeoForge 26.2 version. If yes, diff upstream 26.1.2 against 26.2 and replay the relevant game-logic changes on the Fabric port.
 - [ ] **Read change summaries:** Fabric's 26.2 blog post and docs, the NeoForge 26.1 to 26.2 migration primer (vanilla changes), Minecraft Wiki "Java Edition 26.2".
-- [ ] **Claude Code:** bump Minecraft, Fabric Loader, Loom, Fabric API (0.155.2+26.2 or newer), Forge Config API Port (v26.2.x), Trinkets (4.1.x+26.2), recipe viewer. Fix compile errors, one area at a time.
+- [ ] **Work:** bump Minecraft, Fabric Loader, Loom, Fabric API (0.155.2+26.2 or newer), Forge Config API Port (v26.2.x), Trinkets (4.1.x+26.2), recipe viewer. Fix compile errors, one area at a time.
 - [ ] **Known 26.2 change areas from other mods' ports:** screen management (for example `Minecraft.setScreen` was renamed to `setScreenAndShow`), some GUI/HUD and rendering internals moved. Expect most work in client code (M9 areas).
-- [ ] **You test:** rerun the full `TEST_CHECKLIST.md` on 26.2, singleplayer and dedicated server. Also load a world created in the 26.1.2 port to confirm gear items and block entities survive the upgrade.
-- [ ] Tag `fabric-26.2-4.2.1-port.1`.
+- [ ] **Test:** rerun the full `TEST_CHECKLIST.md` on 26.2, singleplayer and dedicated server. Also load a world created in the 26.1.2 port to confirm gear items and block entities survive the upgrade.
+- [ ] Tag `4.2.3+26.2` (or the matching upstream version).
 
 ---
 
@@ -313,43 +319,11 @@ Run each item in instance A (reference) and instance B (port), note any differen
 | Fabric API class renames in 26.1 | Low/medium, confuses older tutorials | Always check the 26.1 porting guide and the cloned Fabric API source |
 | Trinkets Updated is beta on 26.x | Low/medium | Keep integration behind a soft dependency check so the mod runs without it |
 | Upstream changes during the port | Low | Pin upstream commits in `PORTING_NOTES.md`, sync deliberately after Phase 1 |
-| Large refactors drifting from upstream logic | Medium | Rule in `CLAUDE.md`: port loader glue only, never rewrite game logic |
+| Large refactors drifting from upstream logic | Medium | Rule: port loader glue only, never rewrite game logic |
 
 ---
 
-## 9. Working with Claude Code
-
-### Suggested `CLAUDE.md`
-
-```markdown
-# Silent Gear Fabric port
-
-## Context
-- Porting Silent Gear 4.2.1 (NeoForge, MC 26.1.2) to Fabric. Upstream source is in reference/ (read-only, never edit).
-- Minecraft 26.x is unobfuscated. Vanilla class/method names are identical between NeoForge and Fabric.
-- Lookup tables: docs/API_MAPPING.md, docs/NEOFORGE_API_INVENTORY.md. Log decisions in docs/PORTING_NOTES.md.
-- Fabric API source for 26.1.2 is in reference/fabric. Check real signatures there, do not rely on old tutorials (many Fabric API names changed in 26.1).
-
-## Rules
-- Port loader-specific glue only. Do not change game logic, balance, or data formats.
-- No net.neoforged imports may remain in silent-gear-fabric or silent-lib-fabric.
-- Keep package names and class names from upstream where possible so diffs against upstream stay readable.
-- Prefer Fabric API over mixins. When a mixin is needed, keep it minimal and list it in PORTING_NOTES.md.
-- Dependencies use `implementation` (non-remapping Loom for 26.x).
-- Finish every task with `./gradlew build` passing. Do not run the game; the user tests by hand.
-- At the end of each task, write a short summary: files changed, mixins added, anything not ported, and what the user should test.
-```
-
-### Session pattern per milestone
-1. Start a fresh Claude Code session per milestone, point it at the milestone section of this plan.
-2. Ask for a short plan first (Claude Code plan mode), approve it, then let it implement.
-3. Require a green build and the end-of-task summary.
-4. You run the milestone's manual tests, paste any crash log or wrong behavior back into the same session.
-5. Commit and merge, update `PORTING_NOTES.md`.
-
----
-
-## 10. Release (after Phase 2)
+## 9. Release
 
 - [ ] `fabric.mod.json`: dependencies on Fabric API, Forge Config API Port, Silent Lib Fabric; suggests Trinkets and recipe viewer.
 - [ ] README with credits to SilentChaos512, MIT license, link to upstream, clear "unofficial port" wording.
