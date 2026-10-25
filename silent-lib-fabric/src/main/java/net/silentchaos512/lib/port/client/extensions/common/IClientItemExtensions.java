@@ -2,6 +2,7 @@ package net.silentchaos512.lib.port.client.extensions.common;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.entity.layers.EquipmentLayerRenderer;
 import net.minecraft.client.resources.model.EquipmentClientInfo;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.item.Item;
@@ -44,7 +45,9 @@ public interface IClientItemExtensions {
     /**
      * Lets the item set the first-person hand pose itself. Return true to skip vanilla's transform.
      *
-     * <p>Hook: not called by vanilla yet (milestone M9, {@code ItemInHandRenderer}).
+     * <p>Hook: called from {@code ItemInHandRenderer.renderArmWithItem} (Silent Lib's client
+     * {@code ItemInHandRendererMixin}) for items that are not maps or crossbows, at the point where NeoForge calls
+     * it. When it returns true, vanilla's use, spin attack and swing transforms are skipped.
      *
      * @param poseStack        the pose stack to transform
      * @param player           the local player
@@ -62,16 +65,19 @@ public interface IClientItemExtensions {
     /**
      * Gets the tint color of an armor layer when the armor is worn.
      *
-     * <p>Hook: not called by vanilla yet (milestone M9, equipment layer rendering).
+     * <p>Hook: called for each layer by {@code EquipmentLayerRenderer.renderLayers} (Silent Lib's client
+     * {@code EquipmentLayerRendererMixin}), which draws worn armor, elytra wings and other equipment. As on
+     * NeoForge, {@code fallbackColor} is the stack's dye color (0 if undyed), not the finished layer color. The
+     * default returns vanilla's color for the layer, so items without an override look as they do in vanilla.
      *
      * @param stack         the worn stack
      * @param layer         the equipment layer
-     * @param layerIdx      the index of the layer
-     * @param fallbackColor the color vanilla would use
-     * @return the color as ARGB, or -1 for no tint
+     * @param layerIdx      the index of the layer in the equipment asset
+     * @param fallbackColor the stack's dye color, or 0
+     * @return the color as ARGB, -1 for no tint, or 0 to skip the layer
      */
     default int getArmorLayerTintColor(ItemStack stack, EquipmentClientInfo.Layer layer, int layerIdx, int fallbackColor) {
-        return fallbackColor;
+        return EquipmentLayerRenderer.getColorForLayer(layer, fallbackColor);
     }
 
     /**
