@@ -66,7 +66,7 @@ Data pack files are left out of the build until M4, so this checks the client as
   `alloy_forge`, `salvager`, `gear_smithing_table`, `refabricator`, and "Missing texture references"
   for `gear_smithing_table`, `material_grader`. Compare with instance A when it is set up.
 - Expected in the log until M9: errors about 86 `silentgear` item models with unknown
-  `silentgear:gear_part`, `silentgear:material` or `silentgear:paint_color` types. Claude filters these.
+  `silentgear:gear_part`, `silentgear:material` or `silentgear:paint_color` types. These can be ignored.
 
 ### M4 registries and basic content (passed 2026-10-18 with `runClient`)
 Gear behavior (durability, traits, tool actions) is not wired yet, see PORTING_NOTES "Hooks still to wire".
@@ -219,9 +219,8 @@ with the NeoForge reference when something looks off.
 ### M9 client rendering (passed 2026-10-25, visual checks limited, see note)
 Fabric dev client, compared with the NeoForge reference instance. Two new client mixins: a wrong target
 crashes at startup, so check the first item first.
-**Note (2026-10-25):** the tester has low vision, so fine visual comparisons with the reference (material
-colors, broken models, armor tint details) were only checked roughly. These are left for player reports after
-release, and for the M11 full pass if someone else can help.
+**Note (2026-10-25):** fine visual comparisons with the reference (material colors, broken models, armor tint
+details) were only checked roughly. They are left for player reports after release.
 - [x] `runClient` starts and a world loads
 - [~] (deferred to player reports) Gear made from different materials looks different (try iron, gold, diamond, wood and crimson steel
       pickaxes and swords): in the inventory, in hand (first and third person, F5), dropped on the ground, in an
@@ -256,17 +255,17 @@ itself did not change, so there is little to test by hand.
 
 M11 (2026-10-25): most of this list is checked by the gametest suite, marked "(auto)" with the test name.
 `runGametest` runs 70 tests on a headless dedicated server; all pass. What is left for a person is marked
-"(you)" and kept to clear yes or no checks. Fine visual comparisons with the reference are left for player
+"(manual)" and kept to clear yes or no checks. Fine visual comparisons with the reference are left for player
 reports after release (see the M9 note).
 
 ### Boot and stability
 - [x] (auto) Client log has no Silent Gear or Silent Lib errors: only the same model warnings as the NeoForge
       reference log, plus the dev client's offline login errors (checked from the M10 `runClient` log)
 - [x] (auto) A dedicated server starts with all mods (the gametest server is a dedicated server)
-- [x] (you, 2026-10-25) A client joins the dedicated server (`runServer`, then `runClient` and join `localhost`)
+- [x] (manual, 2026-10-25) A client joins the dedicated server (`runServer`, then `runClient` and join `localhost`)
 - [x] (auto) Gear and machine contents survive saving and loading (`gearSurvivesSaveAndSync`,
       `everyMachineKeepsItsContents`)
-- [x] (you, 2026-10-25) Save and quit a world with gear in a chest and items in a machine, reload: everything is still there
+- [x] (manual, 2026-10-25) Save and quit a world with gear in a chest and items in a machine, reload: everything is still there
 
 ### Content
 - [x] (auto) Every item and block has an English name (`everyItemAndBlockHasAName`; the wall stone torch has none,
@@ -274,14 +273,14 @@ reports after release (see the M9 note).
 - [x] (auto) Every item has a model definition, its models exist, and their Silent Gear textures exist
       (`everyItemHasAModelAndTextures`)
 - [x] (auto) Ores and wild plants are added to overworld, nether and end biomes (`oresAreAddedToBiomes`)
-- [x] (you, 2026-10-25) In a new world, bort ore is found underground (`/fill ... air replace silentgear:deepslate_bort_ore`
+- [x] (manual, 2026-10-25) In a new world, bort ore is found underground (`/fill ... air replace silentgear:deepslate_bort_ore`
       reports removed blocks; nether and end not checked by hand, covered by `oresAreAddedToBiomes`)
 - [x] (auto) Every block has a blockstate and drops something when mined (`everyBlockHasStateAndDrops`; the
       phantom light has neither, same as upstream)
 
 ### Data
 - [x] (auto) The same number of traits (77), materials (131) and parts (48) load as on NeoForge (`gearDataLoads`)
-- [x] (you, 2026-10-25) `/reload` in a world shows no red error in chat
+- [x] (manual, 2026-10-25) `/reload` in a world shows no red error in chat
 - [ ] Custom data pack that adds or changes a material: left for players and pack makers (the data format is
       unchanged from upstream)
 - [ ] Stats in tooltips match the reference: left for player reports (same data and stat code as upstream)
@@ -314,14 +313,14 @@ reports after release (see the M9 note).
 
 ### Client
 - [~] Gear rendering per material: deferred to player reports (M9 note)
-- [x] (you, 2026-10-25, all 10) Every machine screen opens when you right-click the block (the shift-click part is automated)
+- [x] (manual, 2026-10-25, all 10) Every machine screen opens when you right-click the block (the shift-click part is automated)
 - [x] Tooltips (normal, Shift, Ctrl) looked fine in M9
 - [x] Key bindings appear and work (M9)
-- [x] (you, 2026-10-25) JEI shows Silent Gear's recipes, including the Gear Crafting page. First try: that page
+- [x] (manual, 2026-10-25) JEI shows Silent Gear's recipes, including the Gear Crafting page. First try: that page
       was empty; fixed (listener order). JEI's item list shows gear only as the "Example" items, not per material:
       same as NeoForge (upstream behavior, see PORTING_NOTES)
 
 ### Multiplayer
-- [x] (you, 2026-10-25: diamond pickaxe) With a client joined to the dedicated server (first Boot item), gear crafted there shows its
+- [x] (manual, 2026-10-25: diamond pickaxe) With a client joined to the dedicated server (first Boot item), gear crafted there shows its
       materials and stats in the tooltip
 - [ ] Two clients at once: left for player reports (needs two accounts)

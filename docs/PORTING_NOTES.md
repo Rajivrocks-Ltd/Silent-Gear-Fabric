@@ -222,7 +222,7 @@ Every diff in this port is against these commits. They live in `reference/` (git
 - M7 crafting hooks wired (see "Wired in M7" below). First test run crashed at startup: `CraftingMenuMixin`
   targeted `assemble(CraftingInput)`, but the compiled call is `assemble(RecipeInput)` (generic erasure). Mixin
   targets are now checked against `javap` bytecode, not only the decompiled source.
-- **JEI moved forward from M8** at the user's request (finding recipes without it is slow). JEI Fabric
+- **JEI moved forward from M8** (finding recipes without it is slow). JEI Fabric
   29.47.0.111 is a dev runtime mod (`localRuntime`), the plugin compiles against `jei-26.1.2-common-api` and
   `jei-26.1.2-fabric-api` (`compileOnly`), and `fabric.mod.json` suggests `jei`. Players install JEI themselves.
 - Silent Gear's JEI plugin (`compat/jei`, 6 classes) is back in the build. It has no NeoForge code; it uses JEI's
@@ -348,9 +348,8 @@ Wired in M9: see the M9 decisions below.
   block, `phantom_light` and shield warnings, plus `Missing textures in model silentgear:item/trident`, the
   upstream bug the M7 trident Port fix repaired. The JEI line was in a cut-off part of the reference log.
 - **M9 test (2026-10-25):** game starts with the new client mixins, trident animation and throw work, mining
-  does not bob, a diamond armor set looks right. The tester has low vision, so detailed visual comparisons with
-  the reference (material colors, broken models, armor and elytra tint) are left for player reports after
-  release; tooltips, screens and keys looked fine but not every case was checked.
+  does not bob, a diamond armor set looks right. Detailed visual comparisons with the reference (material colors,
+  broken models, armor and elytra tint) are left for player reports after release; tooltips, screens and keys looked fine but not every case was checked.
 
 ### 2026-10-25 (M10, data generation)
 
@@ -406,7 +405,7 @@ Wired in M9: see the M9 decisions below.
   - JEI's item list shows gear only as "Example" items without materials, not "Iron Pickaxe" and so on. The Main
     creative tab's filter `!(item instanceof GearItem)` tests the registry holder, never the item, so it also lists
     every gear item without materials; JEI has no subtype rule for gear, so it keeps that first stack and drops the
-    material versions from the Gear tab. Confirmed identical on the NeoForge reference by the user.
+    material versions from the Gear tab. Confirmed identical on the NeoForge reference.
   - Netherite is only a coating material in Silent Gear; crimson steel, azure electrum and tyrian steel are the
     netherite-tier main materials.
 - **Port bug found by the manual pass: JEI's "Gear Crafting" page was empty** (blueprint, part and gear recipes did
@@ -415,7 +414,7 @@ Wired in M9: see the M9 decisions below.
   JEI's registered first, so the page read an empty list. `SilentGearClient` now registers Silent Gear's listener in
   its own phase (`silentgear:store_recipes_first`) ordered before Fabric's default phase. Client only, so it is
   checked by hand.
-- **Release decisions (user, 2026-10-25):** mirror upstream's packaging. Silent Lib stays a separate mod (two
+- **Release decisions (2026-10-25):** mirror upstream's packaging. Silent Lib stays a separate mod (two
   jars, Silent Gear requires `silentlib >= 11.2.0`). Version stays 4.2.3, jars `silent-gear-26.1.2-fabric-4.2.3.jar`
   and `silent-lib-26.1.2-fabric-11.2.0.jar` (upstream: `...-neoforge-...`). Upstream does not tag its 4.x releases
   (only old plain version tags like `2.3.4`), so the release tag is plain `4.2.3` (the plan's
@@ -427,7 +426,7 @@ Wired in M9: see the M9 decisions below.
   saved data is identical, so the save tests compare saved data. In 26.1 the crossbow loads during its use ticks,
   not on release.
 
-### Automated gametests (2026-10-25, user approved)
+### Automated gametests (2026-10-25)
 
 - `silent-gear-fabric/src/gametest` is a dev-only test mod (`silentgear-gametest`) for Fabric's gametest API.
   It is its own source set, so it is not in the release jar. `build.gradle` adds a `gametest` run; run it with
@@ -457,7 +456,7 @@ Wired in M9: see the M9 decisions below.
 
 ## Open questions
 
-- **`neoforge:swim_speed` attribute: decided 2026-10-18** (user chose option a). Silent Gear registers its own
+- **`neoforge:swim_speed` attribute: decided 2026-10-18** (option a). Silent Gear registers its own
   `silentgear:swim_speed` (`SgAttributes.SWIM_SPEED`, base 1.0, range 0 to 1024, synced, like NeoForge's),
   `swift_swim.json` points at it, and en_us.json has its name "Swim Speed". Applied while swimming since M8.
   Found because the trait failed to load and crashed world creation (upstream treats a bad trait file as fatal).
@@ -529,7 +528,7 @@ Things that work differently from the NeoForge version, or are not ported. None 
   upstream either.
 - **Deliberate fixes of upstream bugs** are listed in the next section.
 
-## Upstream issues fixed in the port (deliberate changes, user approved 2026-10-18)
+## Upstream issues fixed in the port (deliberate changes, since 2026-10-18)
 
 Marked `Port fix:` in the code. These bugs are in upstream itself, so they also show on NeoForge.
 
@@ -542,11 +541,11 @@ Marked `Port fix:` in the code. These bugs are in upstream itself, so they also 
   tools, using the existing `textures/item/trident/` layers (rod, main, highlight) in the tint order of
   `items/trident.json`. It shows as a flat icon in hand; upstream's intended 3D held model needs the
   special renderer (milestone M9). `trident_throwing.json` is unused in 26.x and left as is.
-- **Snow Walker did nothing** (approved 2026-10-25). `GearArmorItem.canWalkOnPowderedSnow` checked
+- **Snow Walker did nothing**. `GearArmorItem.canWalkOnPowderedSnow` checked
   `getEquipmentSlot(stack) == FEET`, but that returns null for armor on NeoForge too (26.1 keeps the slot in the
   `EQUIPPABLE` component), so gear boots always sank in powder snow. It now checks `armorType.getSlot()`.
   Gametest `snowWalkerBootsWalkOnPowderSnow` is required again.
-- **A broken pickaxe mined at full speed** (approved 2026-10-25). Broken gear axes, shovels, maces and machetes
+- **A broken pickaxe mined at full speed**. Broken gear axes, shovels, maces and machetes
   slow to 0.25 through `GearHelper.getDestroySpeed`, but the pickaxe used vanilla's tool component, which
   `GearTool.onRecalculatePost` leaves in place when the tool breaks (measured: broken iron pickaxe 6.0, same as
   working). `GearPickaxeItem.getDestroySpeed` now returns the broken speed when broken and is unchanged
@@ -557,12 +556,12 @@ Marked `Port fix:` in the code. These bugs are in upstream itself, so they also 
   that point, the break sound played but the tool stayed whole, so the next block still mined at full speed and
   the sound played again when it really broke. It now uses the damage after traits. Gametest
   `breakCallbackRunsOnceWhenReallyBroken`.
-- **Trait tooltip lines showed twice** (approved 2026-10-25). `GearItem.buildAttributes` added every trait's
+- **Trait tooltip lines showed twice**. `GearItem.buildAttributes` added every trait's
   attribute modifiers, and `GearData.setGearAttributeModifiers` added them again, so each was stored twice with the
   same id (only one applied in play) and the tooltip showed lines like "-60% Gravity" twice, on every gear item
   with an attribute trait. The default `GearItem.buildAttributes` now adds nothing; `GearData` still adds the
   trait modifiers once for every gear item. Gametest `attributeModifiersAreNotDuplicated`.
-- **Magic armor showed as "magic_armor" in tooltips** (approved 2026-10-25). `SgAttributes.MAGIC_ARMOR` uses
+- **Magic armor showed as "magic_armor" in tooltips**. `SgAttributes.MAGIC_ARMOR` uses
   the bare string `magic_armor` as its translation key, and no upstream lang file defines it. en_us.json now
   has `"magic_armor": "Magic Armor"`. Lang data only, no code change; other languages still show the raw key.
 

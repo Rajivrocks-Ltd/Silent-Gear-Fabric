@@ -47,7 +47,7 @@ public class ArmorTests {
      * so a failure here can be told apart from a broken mixin.
      *
      * <p>Upstream never made this work (its check asks {@code getEquipmentSlot}, which returns no slot for
-     * armor); fixed in the port as a "Port fix" in {@code GearArmorItem}, approved 2026-10-25.
+     * armor); fixed in the port as a "Port fix" in {@code GearArmorItem} (2026-10-25).
      *
      * @param helper the test helper
      */
