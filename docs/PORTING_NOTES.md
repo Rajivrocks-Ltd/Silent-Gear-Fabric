@@ -389,6 +389,44 @@ Wired in M9: see the M9 decisions below.
   `ItemModelGenerators.BLANK_LAYER`, `ModelTemplates.createItem`, `BlockModelGenerators.ROTATION_HORIZONTAL_FACING`,
   `BlockLootSubProvider.map` and `enabledFeatures`. No mixins.
 
+### 2026-10-25 (M11, full validation)
+
+- **Automated suite extended to 70 tests** (all pass, also on repeat runs). New classes: `CraftingTests` (every gear
+  recipe, every plain recipe, every conversion, part rules), `ContentTests` (names, item models and textures,
+  blockstates and drops, ore features in biomes, data counts), `StationTests` (every machine menu with shift-click,
+  machine save and load, alloy forge, salvager, hoppers), `BehaviorTests` (tiers against vanilla, bow, slingshot,
+  crossbow, gear save and network sync, repair kit, config change), and two more trait tests.
+- The gear recipe test is driven by the loaded recipes: blueprint ingredients get their blueprint, material
+  ingredients the first common item they accept, part ingredients a default part, and main part items each
+  candidate material in turn. It found no failing recipe among the 34 gear types.
+- **Findings, all upstream behavior (same on NeoForge, not changed):**
+  - The wall stone torch has no English name (it has no item, so it only shows in places like the F3 screen).
+  - JEI logs "16 duplicate items in the Silent Gear: Main creative tab": the 16 paint colors are one item with
+    color data, and upstream's JEI plugin registers no subtype for paint.
+  - JEI's item list shows gear only as "Example" items without materials, not "Iron Pickaxe" and so on. The Main
+    creative tab's filter `!(item instanceof GearItem)` tests the registry holder, never the item, so it also lists
+    every gear item without materials; JEI has no subtype rule for gear, so it keeps that first stack and drops the
+    material versions from the Gear tab. Confirmed identical on the NeoForge reference by the user.
+  - Netherite is only a coating material in Silent Gear; crimson steel, azure electrum and tyrian steel are the
+    netherite-tier main materials.
+- **Port bug found by the manual pass: JEI's "Gear Crafting" page was empty** (blueprint, part and gear recipes did
+  not show with R). JEI starts from Fabric's `ClientRecipeSynchronizedEvent` and builds that page at once from
+  `ClientRecipeHelper`, which fills itself from the same event. Fabric runs listeners in registration order, and
+  JEI's registered first, so the page read an empty list. `SilentGearClient` now registers Silent Gear's listener in
+  its own phase (`silentgear:store_recipes_first`) ordered before Fabric's default phase. Client only, so it is
+  checked by hand.
+- **Release decisions (user, 2026-10-25):** mirror upstream's packaging. Silent Lib stays a separate mod (two
+  jars, Silent Gear requires `silentlib >= 11.2.0`). Version stays 4.2.3, jars `silent-gear-26.1.2-fabric-4.2.3.jar`
+  and `silent-lib-26.1.2-fabric-11.2.0.jar` (upstream: `...-neoforge-...`). Upstream does not tag its 4.x releases
+  (only old plain version tags like `2.3.4`), so the release tag is plain `4.2.3` (the plan's
+  `fabric-26.1.2-4.2.1-port.1` predates the move to 4.2.3). The "sources" and "issues" links of both mods point to
+  github.com/Rajivrocks-Ltd/Silent-Gear-Fabric, so port bugs are not reported upstream; SilentChaos512 stays the
+  credited author.
+- **Test notes:** a gear tool's mining rules hold block sets built from a separate registry lookup
+  (`GearTool.Helper.REGISTRY_LOOKUP`, upstream code), so a tool never compares equal to itself after a save. The
+  saved data is identical, so the save tests compare saved data. In 26.1 the crossbow loads during its use ticks,
+  not on release.
+
 ### Automated gametests (2026-10-25, user approved)
 
 - `silent-gear-fabric/src/gametest` is a dev-only test mod (`silentgear-gametest`) for Fabric's gametest API.
@@ -476,7 +514,20 @@ marked otherwise. Targets were checked with `javap` (generic erasure changes som
 
 ## Known gaps
 
-None yet.
+Things that work differently from the NeoForge version, or are not ported. None changes game logic or balance.
+
+- **Curios is replaced by Trinkets.** Same slots (ring, bracelet, necklace, back). The bracelet slot uses the glove
+  icon, and only en_us says "Requires Trinkets to equip"; other languages still name Curios.
+- **NeoForge key conflict context** (`KeyConflictContext.GUI`) has no Fabric equivalent: Silent Gear keys may show
+  as conflicting in the Controls screen.
+- **Small hooks with no Fabric equivalent:** `PlayerDestroyItemEvent` is not posted when a gear fishing rod breaks;
+  the magnet trait does not read NeoForge's "prevent remote movement" item data (used by some other mods); injected
+  chest loot pools have no pool name.
+- **Data generators:** the data map and global loot modifier providers are not ported, because Fabric does that in
+  code. The three `api/data` provider base classes take a `PackOutput` instead of a `DataGenerator`.
+- **Trident:** held as a flat item model (the M7 Port fix). Upstream's 3D held model renderer is never turned on
+  upstream either.
+- **Deliberate fixes of upstream bugs** are listed in the next section.
 
 ## Upstream issues fixed in the port (deliberate changes, user approved 2026-10-18)
 

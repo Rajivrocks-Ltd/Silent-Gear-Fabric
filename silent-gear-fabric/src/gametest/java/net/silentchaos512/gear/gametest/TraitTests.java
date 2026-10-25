@@ -3,7 +3,9 @@ package net.silentchaos512.gear.gametest;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.monster.zombie.Zombie;
@@ -210,6 +212,43 @@ public class TraitTests {
         helper.assertTrue(fuel.isFuel(wood), "a wood sword should be fuel");
         helper.assertTrue(fuel.burnDuration(wood) > 0, "wood sword burn time is " + fuel.burnDuration(wood));
         helper.assertFalse(fuel.isFuel(GearTestUtil.gear(GearItemSets.SWORD, "iron")), "an iron sword should not be fuel");
+        helper.succeed();
+    }
+
+    /**
+     * Fireproof (a netherite coating) makes the gear item resist fire and lava when dropped (the
+     * {@code fireproof} effect type sets vanilla's damage resistant component).
+     *
+     * @param helper the test helper
+     */
+    @GameTest
+    public void fireproofCoatingResistsFire(GameTestHelper helper) {
+        ItemStack pickaxe = GearTestUtil.gear(GearItemSets.PICKAXE, "iron", GearTestUtil.part(SgItems.COATING, "netherite"));
+        GearTestUtil.assertHasTrait(helper, pickaxe, Const.Traits.FIREPROOF);
+        var resistant = pickaxe.get(DataComponents.DAMAGE_RESISTANT);
+        helper.assertTrue(resistant != null, "a Fireproof pickaxe should have the damage resistant component");
+        String types = resistant.types().unwrapKey().map(tag -> tag.location().toString()).orElse(resistant.types().toString());
+        helper.assertTrue(types.contains("fire"), "it should resist fire, resists " + types);
+        helper.assertTrue(GearTestUtil.gear(GearItemSets.PICKAXE, "iron").get(DataComponents.DAMAGE_RESISTANT) == null, "a plain iron pickaxe should not");
+        helper.succeed();
+    }
+
+    /**
+     * Adamant (barrier) armor gives its wearer Resistance while the player ticks (the {@code wielder_effect}
+     * effect type, applied from the item's inventory tick).
+     *
+     * @param helper the test helper
+     */
+    @GameTest
+    public void adamantArmorGivesResistance(GameTestHelper helper) {
+        TestPlayer player = TestPlayer.survival(helper);
+        ItemStack helmet = GearTestUtil.gear(GearItemSets.HELMET, "barrier");
+        GearTestUtil.assertHasTrait(helper, helmet, Const.Traits.ADAMANT);
+        player.setItemSlot(EquipmentSlot.HEAD, helmet);
+        for (int i = 0; i < 25; i++) {
+            player.doTick();
+        }
+        helper.assertTrue(player.hasEffect(MobEffects.RESISTANCE), "an Adamant helmet should give Resistance, effects: " + player.getActiveEffects());
         helper.succeed();
     }
 

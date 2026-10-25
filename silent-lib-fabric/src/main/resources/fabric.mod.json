@@ -11,8 +11,8 @@
 		"Rajiv (Fabric port)"
 	],
 	"contact": {
-		"sources": "https://github.com/SilentChaos512/SilentLib",
-		"issues": "https://github.com/SilentChaos512/SilentLib/issues"
+		"sources": "https://github.com/Rajivrocks-Ltd/Silent-Gear-Fabric",
+		"issues": "https://github.com/Rajivrocks-Ltd/Silent-Gear-Fabric/issues"
 	},
 	"license": "MIT",
 	"environment": "*",
