@@ -243,6 +243,14 @@ release, and for the M11 full pass if someone else can help.
       Display Trait Descriptions, Display Construction and Materials, Open Item) and work: hold each display
       key over a gear item and the tooltip changes
 
+### M10 data generation (passed 2026-10-25)
+Checked automatically (2026-10-25): `runDatagen` output equals the copied upstream generated resources
+(2,172 files, same content, nothing missing or extra), and `build` and the gametests still pass. The game data
+itself did not change, so there is little to test by hand.
+- [x] The diff between datagen output and the copied files is empty (plan's review step)
+- [x] `runClient` starts and a world loads (2026-10-25; the jar now contains the data generator classes and a few new class
+      tweaker entries; nothing should look or play differently)
+
 ## Full pass (M11 and Phase 2)
 
 ### Boot and stability

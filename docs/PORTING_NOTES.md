@@ -352,6 +352,43 @@ Wired in M9: see the M9 decisions below.
   the reference (material colors, broken models, armor and elytra tint) are left for player reports after
   release; tooltips, screens and keys looked fine but not every case was checked.
 
+### 2026-10-25 (M10, data generation)
+
+- **Result: the ported data generators reproduce the copied upstream generated resources exactly.** 2,172 files,
+  same JSON content, no file missing or extra; the only byte difference was line endings. This includes every
+  Fabric-specific change made to those files since M3 (`fabric:type` ingredient keys, `silentgear:swim_speed`).
+  So `runDatagen` now writes straight into `src/generated/resources`, which is the source of those files from
+  now on: change the generators, not the JSON. `.gitattributes` keeps that folder LF, as datagen writes it, so a
+  run that changes nothing shows nothing in git. The datagen hash cache (`.cache/`) is git-ignored and left out
+  of the jar.
+- **Run:** `.\gradlew.bat :silent-gear-fabric:runDatagen` (headless, about 15 seconds). Loom's
+  `fabricApi.configureDataGeneration` with `client = true` (upstream generates models and sounds in the same run),
+  output `src/generated/resources`, `addToResources = false` (that folder is already a resource folder).
+- **Ported:** Silent Gear's `data/` package (copied from upstream, it was not part of the M4 copy) and the three
+  `api/data/*ProviderBase` classes; Silent Lib's `data/client`, `data/recipe`, `data/tag` helpers. Entry point:
+  `DataGenerators` implements `DataGeneratorEntrypoint` (`fabric-datagen` in `fabric.mod.json`).
+- **Not ported:** `ModDataMapProvider` (furnace fuels, compostables) and `ModLootModifierProvider` (global loot
+  modifiers): their output was left out in M3 because Fabric does it in code (fuel and compost registries,
+  `SgLootModifiers`). Silent Lib's `LibWorldGenProvider`: upstream's world gen datagen is commented out.
+- **API change in `api/data`:** `MaterialsProviderBase`, `PartsProviderBase` and `TraitsProviderBase` take a
+  `PackOutput` instead of a `DataGenerator` (upstream reads NeoForge's `DataGenerator.getPackOutput()`; Fabric
+  gives each provider its output). Add-ons that extend them need the same one-line change.
+- **Silent Lib stand-ins:** `port.data.BlockTagsProvider` / `ItemTagsProvider` (NeoForge's names and
+  constructors on vanilla's `IntrinsicHolderTagsProvider`, so upstream's `tag(...)` calls stay), and
+  `port.data.ExternalTags`: vanilla refuses tag references to tags its provider does not define, NeoForge accepts
+  tags that exist in other packs; this parent lookup accepts other namespaces and still checks the mod's own.
+  `port.Tags` gained the 75 NeoForge tag constants the generators use, with ids read from NeoForge's compiled
+  `Tags` class (16 dye tags are built in a loop there: `c:dyes/<color>`).
+- **Other NeoForge patches replaced:** see the Datagen table in API_MAPPING. Notable: vanilla's block loot check
+  covers every block in the game, so `ModBlockLootTables.generate(BiConsumer)` runs vanilla's loop over
+  `getKnownBlocks()` like NeoForge's patch; vanilla's `EquipmentAssetProvider` only writes vanilla's assets, so
+  `ModEquipmentAssetsProvider` is a plain provider with vanilla's `run` logic; NeoForge's `createItem` parses a
+  namespace, so the saw base template builds its model id directly. Vanilla's loot table validation is on (upstream
+  turns it off through a NeoForge hook) and passes.
+- **Class tweaker additions** (`silentgear.classtweaker`, what NeoForge's access transformer opens):
+  `ItemModelGenerators.BLANK_LAYER`, `ModelTemplates.createItem`, `BlockModelGenerators.ROTATION_HORIZONTAL_FACING`,
+  `BlockLootSubProvider.map` and `enabledFeatures`. No mixins.
+
 ### Automated gametests (2026-10-25, user approved)
 
 - `silent-gear-fabric/src/gametest` is a dev-only test mod (`silentgear-gametest`) for Fabric's gametest API.

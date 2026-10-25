@@ -41,10 +41,18 @@ sourceSets.main.resources {
 	exclude("**/.cache")
 }
 
-sourceSets.main.java {
-	// Upstream code that is ported in a later milestone. Nothing else in the build uses these files.
-	// M10: data generator base classes (they use NeoForge's DataGenerator API).
-	exclude("net/silentchaos512/gear/api/data/**/*ProviderBase.java")
+// Data generation (M10): `.\gradlew.bat :silent-gear-fabric:runDatagen` runs the "fabric-datagen" entrypoint
+// (net.silentchaos512.gear.data.DataGenerators) and rewrites src/generated/resources. Client mode, because
+// upstream generates models and sounds in the same run. The first run reproduced the copied upstream files
+// exactly (2,172 files, same content), so datagen is now the source of those files: change the generators, not
+// the JSON. addToResources is off because that folder is already a resource folder (see sourceSets above).
+fabricApi {
+	configureDataGeneration {
+		client = true
+		modId = "silentgear"
+		outputDirectory = file("src/generated/resources")
+		addToResources = false
+	}
 }
 
 // Automated gametests (dev only, not in the jar). The tests are a small separate mod, "silentgear-gametest",

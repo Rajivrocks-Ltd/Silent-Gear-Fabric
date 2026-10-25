@@ -178,9 +178,21 @@ changes its import from the left column to the right column.
 
 | NeoForge | Fabric |
 |---|---|
-| `GatherDataEvent` | `f.a.datagen.v1.DataGeneratorEntrypoint`, `FabricDataGenerator` |
-| `BlockTagsProvider`, `ItemTagsProvider` | `FabricTagsProvider.BlockTagsProvider` / `ItemTagsProvider` |
-| `GlobalLootModifierProvider`, `DataMapProvider` | not needed once those are code |
+| `GatherDataEvent` | `f.a.datagen.v1.DataGeneratorEntrypoint` (`fabric-datagen` entrypoint), `FabricDataGenerator.Pack.addProvider` |
+| `event.getGenerator().getPackOutput()` | the `FabricPackOutput` passed to each provider factory |
+| `BlockTagsProvider`, `ItemTagsProvider` (common.data) | Silent Lib `port.data.BlockTagsProvider` / `ItemTagsProvider` (vanilla `IntrinsicHolderTagsProvider`, keeps `tag(...)`). Fabric's own providers use `valueLookupBuilder` instead |
+| Tag references to other packs (NeoForge's existing file check) | Silent Lib `port.data.ExternalTags` parent lookup (Fabric's way: `forceAddTag`) |
+| `TagAppender` `replace` / `remove(E)` / `remove(TagKey)` / `add(TagEntry)` | Fabric `setReplace` / `remove` / `removeTag` / none |
+| `ItemTags.create(id)` | `TagKey.create(Registries.ITEM, id)` |
+| `KeyTagProvider` / `IntrinsicHolderTagsProvider` with a mod id argument | vanilla constructors without it |
+| `SoundDefinitionsProvider` | `f.a.client.datagen.v1.provider.FabricSoundsProvider` + `SoundTypeBuilder` |
+| `LootTableProvider` `getTables()` / `validate(...)` overrides | pass the sub-provider list to vanilla's constructor |
+| `BlockLootSubProvider.getKnownBlocks()` | override `generate(BiConsumer)` with vanilla's loop over known blocks (class tweaker opens `map`) |
+| `EquipmentAssetProvider.registerModels` | a plain `DataProvider` with vanilla's `run` logic |
+| `ModelTemplates.createItem("ns:path", ...)` (NeoForge parses the namespace) | `new ModelTemplate(Optional.of(Identifier.parse(...).withPrefix("item/")), ...)` |
+| `NonNullList.copyOf` | `NonNullList.create()` + `addAll` |
+| `RecipeProvider.buildRecipes()` protected (NeoForge) | public in vanilla |
+| `GlobalLootModifierProvider`, `DataMapProvider` | not ported: their output is code on Fabric |
 
 ## Third party
 

@@ -3,3 +3,5 @@ gradlew text eol=lf
 *.bat text eol=crlf
 *.jar binary
 *.png binary
+# Data generator output (runDatagen writes LF); keep it LF so a datagen run shows no line ending changes
+silent-gear-fabric/src/generated/resources/** text eol=lf

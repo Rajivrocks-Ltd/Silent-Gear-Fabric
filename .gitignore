@@ -42,3 +42,6 @@ run/
 bin/
 out/
 run-server/
+
+# Data generator hash cache (runDatagen)
+silent-gear-fabric/src/generated/resources/.cache/

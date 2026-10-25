@@ -24,6 +24,9 @@
 		"client": [
 			"net.silentchaos512.gear.SilentGearClient"
 		],
+		"fabric-datagen": [
+			"net.silentchaos512.gear.data.DataGenerators"
+		],
 		"jei_mod_plugin": [
 			"net.silentchaos512.gear.compat.jei.SGearJeiPlugin"
 		]
