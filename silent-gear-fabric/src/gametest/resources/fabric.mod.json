@@ -14,7 +14,11 @@
 			"net.silentchaos512.gear.gametest.MobDropTests",
 			"net.silentchaos512.gear.gametest.ToolActionTests",
 			"net.silentchaos512.gear.gametest.ArmorTests",
-			"net.silentchaos512.gear.gametest.TrinketsTests"
+			"net.silentchaos512.gear.gametest.TrinketsTests",
+			"net.silentchaos512.gear.gametest.CraftingTests",
+			"net.silentchaos512.gear.gametest.ContentTests",
+			"net.silentchaos512.gear.gametest.StationTests",
+			"net.silentchaos512.gear.gametest.BehaviorTests"
 		]
 	},
 	"depends": {

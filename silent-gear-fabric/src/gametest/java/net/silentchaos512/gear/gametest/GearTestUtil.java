@@ -72,6 +72,21 @@ public final class GearTestUtil {
     }
 
     /**
+     * Checks that two stacks save to the same data. Comparing the stacks directly is not enough: a gear tool's
+     * mining rules hold block sets made from a separate registry lookup, which never compare equal to the ones read
+     * back, even though they save the same.
+     *
+     * @param helper the test helper
+     * @param a      one stack
+     * @param b      the other stack
+     * @return true if both save to the same data
+     */
+    public static boolean sameWhenSaved(GameTestHelper helper, ItemStack a, ItemStack b) {
+        var ops = helper.getLevel().registryAccess().createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE);
+        return ItemStack.OPTIONAL_CODEC.encodeStart(ops, a).getOrThrow().equals(ItemStack.OPTIONAL_CODEC.encodeStart(ops, b).getOrThrow());
+    }
+
+    /**
      * Fails the test unless the stack has the trait, so a later failure is not blamed on the wrong thing.
      *
      * @param helper the test helper

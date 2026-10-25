@@ -252,48 +252,76 @@ itself did not change, so there is little to test by hand.
 - [x] `runClient` starts and a world loads (2026-10-25; the jar now contains the data generator classes and a few new class
       tweaker entries; nothing should look or play differently)
 
-## Full pass (M11 and Phase 2)
+## Full pass (M11 and Phase 2) (M11 passed 2026-10-25)
+
+M11 (2026-10-25): most of this list is checked by the gametest suite, marked "(auto)" with the test name.
+`runGametest` runs 70 tests on a headless dedicated server; all pass. What is left for a person is marked
+"(you)" and kept to clear yes or no checks. Fine visual comparisons with the reference are left for player
+reports after release (see the M9 note).
 
 ### Boot and stability
-- [ ] Client starts, no errors or warnings from silentgear/silentlib in the log
-- [ ] Dedicated server starts and a client can join
-- [ ] World save, quit, reload keeps all gear and block entity contents intact
+- [x] (auto) Client log has no Silent Gear or Silent Lib errors: only the same model warnings as the NeoForge
+      reference log, plus the dev client's offline login errors (checked from the M10 `runClient` log)
+- [x] (auto) A dedicated server starts with all mods (the gametest server is a dedicated server)
+- [x] (you, 2026-10-25) A client joins the dedicated server (`runServer`, then `runClient` and join `localhost`)
+- [x] (auto) Gear and machine contents survive saving and loading (`gearSurvivesSaveAndSync`,
+      `everyMachineKeepsItsContents`)
+- [x] (you, 2026-10-25) Save and quit a world with gear in a chest and items in a machine, reload: everything is still there
 
 ### Content
-- [ ] Every item in the creative tab has a texture and a translated name
-- [ ] Ores generate in new chunks (overworld, nether, end)
-- [ ] Every block places, breaks, and drops correctly
+- [x] (auto) Every item and block has an English name (`everyItemAndBlockHasAName`; the wall stone torch has none,
+      same as upstream)
+- [x] (auto) Every item has a model definition, its models exist, and their Silent Gear textures exist
+      (`everyItemHasAModelAndTextures`)
+- [x] (auto) Ores and wild plants are added to overworld, nether and end biomes (`oresAreAddedToBiomes`)
+- [x] (you, 2026-10-25) In a new world, bort ore is found underground (`/fill ... air replace silentgear:deepslate_bort_ore`
+      reports removed blocks; nether and end not checked by hand, covered by `oresAreAddedToBiomes`)
+- [x] (auto) Every block has a blockstate and drops something when mined (`everyBlockHasStateAndDrops`; the
+      phantom light has neither, same as upstream)
 
 ### Data
-- [ ] `/reload` with no errors
-- [ ] Custom data pack that adds one material and modifies one existing material works
-- [ ] Material, part, and trait stats in tooltips match the reference
+- [x] (auto) The same number of traits (77), materials (131) and parts (48) load as on NeoForge (`gearDataLoads`)
+- [x] (you, 2026-10-25) `/reload` in a world shows no red error in chat
+- [ ] Custom data pack that adds or changes a material: left for players and pack makers (the data format is
+      unchanged from upstream)
+- [ ] Stats in tooltips match the reference: left for player reports (same data and stat code as upstream)
 
 ### Crafting
-- [ ] Blueprints and templates craft
-- [ ] Parts craft from several materials, including mixed-material parts
-- [ ] One of every gear type crafts
-- [ ] Vanilla item conversion recipe works
-- [ ] Each crafting station block works (inputs, outputs, hopper interaction)
+- [x] (auto) Every Silent Gear gear recipe crafts, for all 34 gear types, including quick recipes, lined armor
+      and jewelry with gems (`everyGearRecipeCrafts`)
+- [x] (auto) Every plain shaped and shapeless recipe crafts: blueprints, templates, blocks, nuggets
+      (`everyPlainCraftingRecipeCrafts`)
+- [x] (auto) Every vanilla tool and armor conversion works (`everyConversionRecipeWorks`)
+- [x] (auto) Blueprint stays, template is used up, mixed materials are rejected (`partRulesAndBlueprintRemainder`)
+- [x] (auto) Every machine opens its menu and survives shift-click on every slot
+      (`everyMachineMenuOpensAndShiftClicks`)
+- [x] (auto) Alloy forge makes an alloy, salvager salvages gear, hoppers feed and empty a machine
+      (`alloyForgeMakesAlloy`, `salvagerSalvagesGear`, `hoppersFeedAndEmptyMachines`)
+- [x] (auto) Repair kit fills and repairs (`repairKitFillsAndRepairs`)
 
 ### Behavior
-- [ ] Mining speed and correct-tool rules per tier
-- [ ] Strip, till, path, shear actions
-- [ ] Durability loss, broken state, repair via kit and anvil
-- [ ] Armor protection values match the reference
-- [ ] Bows, crossbows, slingshot and other ranged gear
-- [ ] Sample of traits from every trait effect type
-- [ ] Accessory items in Trinkets slots
-- [ ] Elytra-style flight item
-- [ ] Config change takes effect
+- [x] (auto) Pickaxe tiers match vanilla for wood, stone, iron, diamond and crimson steel
+      (`pickaxeTiersMatchVanilla`)
+- [x] (auto) Strip, till, path, shear actions; durability, broken state, anvil repair (M8 tests)
+- [ ] Armor protection values match the reference: left for player reports (same data and code as upstream)
+- [x] (auto) Bow and slingshot shoot, crossbow loads and shoots (`bowShootsArrow`, `slingshotShootsPebble`,
+      `crossbowLoadsAndShoots`)
+- [x] (auto) Trait sample per effect type: attribute, enchantment, bonus drops, durability, fireproof, wielder
+      effect, fall damage traits (M8 tests plus `fireproofCoatingResistsFire`, `adamantArmorGivesResistance`)
+- [x] (auto) Trinkets slots, equip, keep on death (M8 tests)
+- [x] Elytra flight (tested by hand in M8)
+- [x] (auto) A config change takes effect (`configChangeTakesEffect`)
 
 ### Client
-- [ ] Gear rendering per material (inventory, hand, dropped item, armor on player)
-- [ ] All GUIs open, render, and handle shift-click
-- [ ] Tooltips (normal, shift, ctrl views)
-- [ ] Key mappings appear in controls and work
-- [ ] Recipe viewer (JEI) shows Silent Gear recipes
+- [~] Gear rendering per material: deferred to player reports (M9 note)
+- [x] (you, 2026-10-25, all 10) Every machine screen opens when you right-click the block (the shift-click part is automated)
+- [x] Tooltips (normal, Shift, Ctrl) looked fine in M9
+- [x] Key bindings appear and work (M9)
+- [x] (you, 2026-10-25) JEI shows Silent Gear's recipes, including the Gear Crafting page. First try: that page
+      was empty; fixed (listener order). JEI's item list shows gear only as the "Example" items, not per material:
+      same as NeoForge (upstream behavior, see PORTING_NOTES)
 
 ### Multiplayer
-- [ ] Two clients see the same gear stats and visuals
-- [ ] Server-side `/reload` updates clients
+- [x] (you, 2026-10-25: diamond pickaxe) With a client joined to the dedicated server (first Boot item), gear crafted there shows its
+      materials and stats in the tooltip
+- [ ] Two clients at once: left for player reports (needs two accounts)

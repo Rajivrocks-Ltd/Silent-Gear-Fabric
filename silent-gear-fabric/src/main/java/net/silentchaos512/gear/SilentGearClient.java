@@ -3,6 +3,8 @@ package net.silentchaos512.gear;
 import fuzs.forgeconfigapiport.fabric.api.v5.client.ConfigScreenFactoryRegistry;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.recipe.v1.sync.ClientRecipeSynchronizedEvent;
+import net.fabricmc.fabric.api.event.Event;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.silentchaos512.gear.client.ClientRecipeHelper;
 import net.silentchaos512.gear.client.KeyTracker;
@@ -53,7 +55,12 @@ public final class SilentGearClient implements ClientModInitializer {
         NeoForge.EVENT_BUS.addListener(ItemTooltipEvent.class, GearItemTooltips::onTooltip);
         NeoForge.EVENT_BUS.addListener(ItemTooltipEvent.class, SgDataComponents.TooltipHandler::onTooltip);
         NeoForge.EVENT_BUS.addListener(InputEvent.InteractionKeyMappingTriggered.class, ClientEvents::onClick);
-        ClientRecipeSynchronizedEvent.EVENT.register((client, recipes) -> ClientRecipeHelper.onRecipesReceived(recipes));
+        // Port note: JEI also starts from this event and builds Silent Gear's "Gear Crafting" page right away, from
+        // ClientRecipeHelper. Fabric runs listeners in registration order and JEI registers first, so the page came
+        // out empty. An earlier phase makes Silent Gear store the recipes before JEI reads them.
+        Identifier storeRecipesFirst = SilentGear.getId("store_recipes_first");
+        ClientRecipeSynchronizedEvent.EVENT.addPhaseOrdering(storeRecipesFirst, Event.DEFAULT_PHASE);
+        ClientRecipeSynchronizedEvent.EVENT.register(storeRecipesFirst, (client, recipes) -> ClientRecipeHelper.onRecipesReceived(recipes));
 
         SgNetworkClient.registerClientReceivers();
 
